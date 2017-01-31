@@ -111,7 +111,7 @@ function printFooter(print) {
 		}
 	}
 	if (bonusCardInserted === true) { 
-		print.printStringWordWrap("На чек начислено бонусных баллов: " + BonusDelta);
+		print.printStringWordWrap("Начислено бонусных баллов: " + BonusDelta);
 	} else {
 		print.printStringWordWrap("Могло быть начислено бонусных баллов: " + BonusDelta);
 	}
