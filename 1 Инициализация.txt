@@ -143,6 +143,7 @@ function beforeAddPayment(payment) {
 		}
 		frontol.currentDocument.addPayment(101, realDisc);
 		frontol.actions.cancel();
+	// оплата сертификатами с фиксированным номиналом
 	} else if (payment.type.name === "Сертификат") {
 		var sertificateString =  getSertificateString();
 		var sertNominal = frontol.actions.selectString("Выберите номинал сертификата", sertificateString, sertificateString);
