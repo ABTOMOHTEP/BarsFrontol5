@@ -36,24 +36,16 @@ function printPosition(print) {
 		} else {
 			actionName = "Скидка";
 		}
-		//var discSuff = "";
 		var discSumForPrint = "";				
 		if (pDiscountPos.valueType == 0) {
-			var discPercent = Math.round(dPosition.sum / pDiscountPos.value * 100) / 100;
+			var discPercent = print.formatPercent(pDiscountPos.value / dPosition.sum * 100);
 			actionName += " (" + discPercent + "%)";
 			discSumForPrint = print.formatCurrency(invertValue(pDiscountPos.value));
 		} else {
-			//discSuff= "%";
 			actionName += " (" + pDiscountPos.value + "%)";
-			discSumForPrint = print.formatPercent(invertValue(pDiscountPos.value)) + "%";
+			discSumForPrint = print.formatCurrency(dPosition.sum - dPosition.totalSum);
 		}
-		// var discStringForPrint = "";
-		// if (pDiscountPos.sum < 0) {
-		// 	discStringForPrint = "+" + discSumForPrint;
-		// } else {
-		// 	discStringForPrint = "-" + discSumForPrint;
-		// }
-		print.printLRStringLF("  " + actionName, discSumForPrint + discSuff, "_");
+		print.printLRStringLF("  " + actionName, discSumForPrint, "_");
 	}
 	print.printLRString("  " + "Сумма", print.formatCurrency(dPosition.totalSum), "_");
 }
