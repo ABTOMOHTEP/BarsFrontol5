@@ -1,0 +1,131 @@
+function printHeader(print) {
+	print.printLRStringLF("=","=","=");
+}
+
+function printPosition(print) {
+	var dPosition = frontol.currentDocument.position;
+	if (dPosition.storno === 1) {
+		print.printCenterString("СТОРНО", " ");
+	}
+	print.printString(dPosition.number + ". " + dPosition.ware.text);
+	if (dPosition.storno === 1) {
+		return;
+	}
+	if (dPosition.aspect.count !== 0 && dPosition.ware.name === "Пополнение баланса подарочной карты") {
+		var pAspect = dPosition.aspect;
+		for (pAspect.index = 1; pAspect.index <= pAspect.count; pAspect.index ++) {
+			if (pAspect.code !== 0 
+				&& pAspect.code !== 1000000000) {
+				print.printStringWordWrap("    Подарочная карта:" + " " + pAspect.text);
+			}
+		}
+	}
+	print.printLRStringLF("  " + print.formatQuantity(dPosition.quantity), print.formatCurrency(dPosition.sum),"_");
+	
+	var pDiscountPos = dPosition.discountPos;
+	for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index++) {
+		if (pDiscountPos.sum === 0) {
+			continue;
+		}
+		if (pDiscountPos.marketingAction === null) {
+			continue;
+		}
+		var actionName = "";
+		if(pDiscountPos.marketingAction.text != "") {
+			actionName = pDiscountPos.marketingAction.text;
+		} else {
+			actionName = "Скидка";
+		}
+		var discSuff = "";
+		var discPercent = Math.round(pDiscountPos.value / dPosition.totalSum * 10000) / 100;
+		var discSumForPrint = "";				
+		if (pDiscountPos.valueType == 0) {
+			discSumForPrint = print.formatCurrency(pDiscountPos.value);
+			actionName += " (" + discPercent + "%)";
+		} else {
+			discSuff= "%";
+			discSumForPrint = print.formatPercent(pDiscountPos.value);
+		}
+		var discValueForPrint;
+		if (pDiscountPos.sum < 0) {
+			discValueForPrint = "+" + -pDiscountPos.value;
+		} else {
+			discValueForPrint = "-" + pDiscountPos.value;
+		}
+		print.printLRStringLF("  " + actionName, discValueForPrint + discSuff, "_");
+	}
+	print.printLRString("  " + "Сумма", print.formatCurrency(dPosition.totalSum), "_");
+}
+
+function printFooter(print) {
+	print.printLRStringLF("=", "=", "=");
+	var dAspect = frontol.currentDocument.aspect;
+	for(dAspect.index = 1; dAspect.index <= dAspect.count; dAspect.index ++) {
+		if (dAspect.text !== "") {
+			print.printStringWordWrap(dAspect.aspectText + ": " 
+			+ dAspect.text);
+		}
+	}
+	print.printLRStringLF("Итог", print.formatCurrency(frontol.currentDocument.sum), "_");
+	if (frontol.currentDocument.sum !== frontol.currentDocument.totalSum) {
+		print.printLRStringLF("Сумма со скидками", print.formatCurrency(frontol.currentDocument.totalSum),"_");
+	}
+	print.printLRStringLF("-", "-", "-");
+	var dTax = frontol.currentDocument.tax;
+	for (dTax.index = 1; dTax.index <= dTax.count; dTax.index ++) {
+		if (dTax.sum !== 0) {
+			print.printLRString("Включая налоги " + dTax.taxRateText, print.formatCurrency(dTax.sum), "_");
+		}
+		print.printLRStringLF("-", "-", "-");
+	}
+	print.printStringWordWrap("Оплата");
+	var dPayment = frontol.currentDocument.payment;
+	for (dPayment.index = 1; dPayment.index <= dPayment.count; dPayment.index++) {
+		if(dPayment.sumInBaseCurrency > 0) {
+			print.printLRString("  " + dPayment.type.text, "=" 
+				+ print.formatCurrency(dPayment.sumInBaseCurrency), "_");
+		} else {
+			print.printStringWordWrap("Сдача");
+			print.printLRString("  " + dPayment.type.text, "=" 
+				+ print.formatCurrency(-dPayment.sumInBaseCurrency), "_");
+		}
+	}
+
+	// печать бонусных баллов
+	var BonusDelta = 0;
+	BonusDelta = frontol.currentDocument.userValues.get("nachislenie");
+	var bonusCardInserted = false;
+	var dCard = frontol.currentDocument.card;
+	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+		if (dCard.value.length === 6) {
+			var cCounter = dCard.counter;
+			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+				if (cCounter.type.code === 1) {
+					print.printLRStringLF("Баланс бонусов без учета этого чека: ", print.formatCurrency(cCounter.value), "_");
+					bonusCardInserted = true;
+				}
+			}
+		}
+	}
+	if (bonusCardInserted === true) { 
+		print.printStringWordWrap("На чек начислено бонусных баллов: " + BonusDelta);
+	} else {
+		print.printStringWordWrap("На чек могло быть начислено бонусных баллов: " + BonusDelta);
+	}
+	var totalDisc = 0;
+	totalDisc = frontol.currentDocument.userValues.get("spisanie");
+	totalDisc = Math.floor(totalDisc);
+	if (bonusCardInserted === true && totalDisc !== 0) {
+		print.printStringWordWrap("Списано бонусных баллов: " + totalDisc);
+	}
+	if (frontol.currentDocument.cardValues !== "") {
+		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+			if (dCard.value.length === 6) {
+				print.printStringWordWrap("Бонусная карта: " + dCard.value);
+			} else if (frontol.currentDocument.card.value.length === 8) {
+				print.printStringWordWrap("Подарочная карта: " + dCard.value);
+			}
+		}
+	}
+}
+

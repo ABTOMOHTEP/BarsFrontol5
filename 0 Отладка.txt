@@ -1,0 +1,5 @@
+var frontol;
+var Icon;
+var Button;
+var DialogResult;
+

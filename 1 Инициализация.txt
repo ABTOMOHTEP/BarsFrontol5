@@ -1,0 +1,534 @@
+function init() {
+	frontol.addEventListener("addCard", "beforeAddCard", true);
+	frontol.addEventListener("addCard", "afterAddCard", false);
+	frontol.addEventListener("changePosition", "beforeChangePosition", true);
+	frontol.addEventListener("addPosition", "beforeAddPosition", true);
+	frontol.addEventListener("addPayment", "beforeAddPayment", true);
+	frontol.addEventListener("stornoPayment", "beforeStornoPayment", true);
+	frontol.addEventListener("closeDocument", "beforeCloseDocument", true);
+	frontol.addEventListener("closeDocument", "afterCloseDocument", false);
+}
+
+function beforeAddCard(card) {
+	var dCard = frontol.currentDocument.card;
+	if (card.value.length === 6) {
+		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+			if (dCard.value.length === 6) {
+				frontol.actions.showMessage("Бонусная карта уже введена!");
+				frontol.actions.cancel();
+			}
+		}
+	}
+	else if (card.value.length === 8) {
+		for (card.classifier.index = 1; card.classifier.index <= card.classifier.count; card.classifier.index ++) {
+			if (card.classifier.code === 1) {
+				frontol.actions.showMessage("С сертификата уже списывались средства!");
+				frontol.actions.cancel();
+			}
+		}
+	}
+}
+
+function afterAddCard(card) {
+	if (card.value.length !== 6) {
+		return 0;
+	}
+
+	var bonusSumm = 0;
+	var buySumm = 0;
+	var cardLevel = 1;
+	for (card.counter.index = 1; card.counter.index <= card.counter.count; card.counter.index ++) {
+		if (card.counter.type.code === 1) {
+			bonusSumm = Math.floor(card.counter.value);
+		}
+		else if (card.counter.type.code === 3) {
+			buySumm = Math.floor(card.counter.value);
+			if (buySumm >= 100000) {
+				cardLevel = 2;
+			}
+		}
+	}
+	frontol.actions.showMessage("На карте накоплено баллов: " + bonusSumm
+		+ "\n" + "Сумма покупок по карте: " + buySumm
+		+ "\n" + "Уровень карты: " + cardLevel);
+}
+
+function beforeChangePosition(position) {
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		var pDiscountPos = frontol.currentDocument.position.discountPos;
+		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+			if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
+				&& (pDiscountPos.sum > 0)) {
+				frontol.actions.showMessage("Запрещено изменять позиции \n в чеке со списанием бонусами!");
+				frontol.actions.cancel();
+			}
+		}
+	}
+}
+
+function beforeAddPosition(position) {
+	if(frontol.currentDocument.type.name === "ВОЗВРАТ") {
+		return 0;
+	}
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		var pDiscountPos = frontol.currentDocument.position.discountPos;
+		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+			if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
+				&& (pDiscountPos.sum > 0)) {
+				frontol.actions.showMessage("Запрещено добавлять позиции \n в чек со списанием бонусами!");
+				frontol.actions.cancel();
+			}
+		}
+	}	
+}
+
+function beforeAddPayment(payment) {
+	// напоминание кассиру
+	if ((frontol.currentDocument.type.name === "ПРОДАЖА") 
+		&& (frontol.currentDocument.payment.count === 0) 
+		&& (frontol.currentDocument.card.count === 0)) {
+		if (frontol.actions.showMessage("Ввести бонусную/подарочную карту в чек?", Button.YesNo + Icon.Question) === DialogResult.Yes) {
+			var WShell = new ActiveXObject("WScript.Shell");
+			WShell.SendKeys ("^({F8})");
+			frontol.actions.cancel();
+		}
+	}
+
+	// оплата подарочными сертификатами
+	if (payment.type.name === "Подарочная карта") {
+		var totalSertificatesRemain = 0;
+		var dCard = frontol.currentDocument.card;
+		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+			if (dCard.value.length === 8) {
+				var cClassifier = dCard.classifier;
+				for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
+					if (cClassifier.code === 1) {
+						frontol.actions.showMessage("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
+						frontol.actions.cancel();
+					}
+				}
+				var cCounter = dCard.counter;				
+				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+					if (cCounter.type.code === 2) {
+						totalSertificatesRemain += cCounter.value;
+					}
+				}
+			}
+		}
+		if (totalSertificatesRemain === 0) {
+			frontol.actions.showMessage("Сертификаты не введены или полностью погашены!");
+			frontol.actions.cancel();
+		}
+
+		// Списываем со всех сертификатов		
+		var skid1 = Math.min(frontol.currentDocument.totalSum, totalSertificatesRemain);
+		var realDisc = skid1;
+		var remainingSumm = realDisc;
+		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+			if (dCard.value.length === 8) {
+				var cCounter = frontol.currentDocument.card.counter;
+				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+					if (cCounter.type.code === 2) {
+						var sertificateSumm = cCounter.value;
+						var sertificatePaymentSumm = Math.min(sertificateSumm, remainingSumm);
+						remainingSumm -= sertificatePaymentSumm;
+						cCounter.addValue(-sertificatePaymentSumm);
+						dCard.classifier.bind(1);
+						break;
+					}
+				}
+			}
+		}
+		frontol.currentDocument.addPayment(101, realDisc);
+		frontol.actions.cancel();
+	}
+}
+
+function beforeStornoPayment(payment) {
+	// при сторнировании оплаты возвращаем сумму платежа подарочными сертификатами на счетчики
+	if (payment.type.name !== "Подарочная карта") {
+		return;
+	}  
+	var remainingSummForStorno = payment.sumInPaymentCurrency;
+	var dCard = frontol.currentDocument.card;
+	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+		if (dCard.value.length === 8) {
+			var cCounter = dCard.counter;
+			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+				if (cCounter.type.code === 2) {
+					cCounter.addValue(remainingSummForStorno);
+					remainingSummForStorno = 0;
+					var cClassifier = dCard.classifier;
+					for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
+						cClassifier.unBind();
+					}
+					break;
+				}
+			}
+		}
+	}		
+}
+
+function calculateBonusMacro() {
+	var bonusCardFound = false;
+	var summBonusClient = 0;
+	var bonusCardLevel = 1;
+	// проверка на введенную бонусную карту
+	var dCard = frontol.currentDocument.card;
+	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+		if (dCard.value.length === 6) {
+			bonusCardFound = true;
+			// проверка принадлежности карты к стоп-листу списаний
+			var cClassifier = dCard.classifier;
+			for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
+				if (cClassifier.code === 1) {
+					frontol.actions.showMessage("С данной карты сегодня уже списывались бонусы!");
+					frontol.actions.cancel();
+				}
+			}
+			// расчет накоплений и уровня карты клиента
+			var cCounter = dCard.counter;
+			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+				if (cCounter.type.code === 1) {
+					summBonusClient = cCounter.value;
+				}
+				else if (cCounter.type.code === 3) {
+					var buySumm = Math.floor(cCounter.value);
+					if (buySumm >= 100000) {
+						bonusCardLevel = 2;
+					}
+				}
+			}
+			break;
+		}
+	}
+	if (!bonusCardFound) {
+		frontol.actions.cancel();
+	}
+
+	// проверка скидок на документ
+	if (frontol.currentDocument.discountDoc.count > 0) {
+		frontol.actions.showMessage("Запрещено списывать бонусы при наличии другой скидки на документ!");
+		frontol.actions.cancel();
+	}
+
+	// проверка ручных скидки на товары
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		var pDiscountPos = dPosition.discountPos;
+		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+			if (pDiscountPos.marketingAction.code === 28 // маркетинговая акция "ручная скидка"
+				&& pDiscountPos.sum > 0) {
+				frontol.actions.showMessage("Запрещено списывать бонусы при наличии ручной скидки!");
+				frontol.actions.cancel();
+			}
+		}
+	}
+
+	var summDiscWares = 0;   // сумма, разрешенная для списания
+	var summRealDisc = 0;    // сумма примененных скидок на чек
+	var summDokForSkid = 0;  // сумма документа для расчета процента скидки
+	var autoDiscActive;
+	var summWares10 = 0;
+	var summWares20 = 0;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		// расчет максимальной суммы списания для товаров с максимальной скидкой
+		autoDiscActive = false;
+		if (dPosition.storno === 1) {
+			continue;
+		}
+		summRealDisc += dPosition.totalSumDiscount;
+		if (dPosition.ware.code === 0) {		//продажи по свободной цене
+			summDiscWares += dPosition.sum;
+		} else if (dPosition.ware.maxDiscount !== 0) {		//обычные продажи
+			summDiscWares += dPosition.sum * dPosition.ware.maxDiscount / 100;
+		}
+		if ((dPosition.sum - dPosition.totalSum) === 0) {
+			summDokForSkid += dPosition.sum;
+		} else if ((dPosition.sum - dPosition.totalSum) !== 0) {
+			var pDiscountPos = dPosition.discountPos;
+			for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+				if (pDiscountPos.marketingAction.code === 100000000) {  // ищем автоматические скидки на позицию
+					autoDiscActive = true;
+				}
+			}
+			if (autoDiscActive === false) {
+				summDokForSkid += dPosition.sum;
+			}
+		}
+		// рассчет суммы товаров с классификатором "товарыСоСкидкой10" и "товарыСоСкидкой20"
+		var wClassifier = dPosition.ware.classifier;
+		for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
+			if (wClassifier.code === 3) {
+				if ((dPosition.sum - dPosition.totalSum) === 0) {
+					summWares10 += dPosition.sum;
+				}
+			} else if (wClassifier.code === 4) {
+				if ((dPosition.sum - dPosition.totalSum) === 0) {
+					if (bonusCardLevel === 2) {
+						summWares20 += dPosition.sum;
+					}
+					else {
+						summWares10 += dPosition.sum;
+					}
+				}
+			}
+		}
+	}
+
+	var standartProc = maxBonusPercent(summDokForSkid);
+
+	// расчет максимальной суммы скидки от суммы чека (без учета накоплений клиента)
+	var maxBonusDiscForDocument = 0;
+	if (summDokForSkid < 10) {
+		maxBonusDiscForDocument = 0;
+	} else {
+		var discSummWares10 = summWares10 / 100 * (10 - standartProc); // сумма доп. скидки на товары с классификатором товарыСоСкидкой10
+		var discSummWares20 = summWares20 / 100 * (20 - standartProc); // сумма доп. скидки на товары с классификатором товарыСоСкидкой20
+		maxBonusDiscForDocument = Math.min(Math.floor(summDokForSkid / 100 * standartProc + discSummWares10 + discSummWares20), Math.floor(summDiscWares - summRealDisc));
+	}
+
+	// расчет суммы скидки от суммы чека (с учетом накоплений клиента)
+	var maxBonusDiscForClient = 0;
+	if (summBonusClient > 0) {
+		if (summDokForSkid < 10) {
+			maxBonusDiscForClient = 0;
+		} else {
+			maxBonusDiscForClient = Math.min(Math.floor(summBonusClient), maxBonusDiscForDocument);
+		}
+	} else {
+		maxBonusDiscForClient = 0;
+		frontol.actions.showMessage("Нулевой баланс карты или карта не введена!");
+	}
+
+	// ввод суммы списания
+	var stringMessage = "Введите значение скидки (максимум: " + maxBonusDiscForClient + " баллов)";
+	var realDisc = frontol.actions.inputString(stringMessage, maxBonusDiscForClient, 10);
+	if (realDisc === null || realDisc === "" || realDisc > maxBonusDiscForClient || realDisc === 0) {
+		frontol.actions.showMessage("Введено неверное значение!", Icon.Exclamation);
+		frontol.actions.cancel();
+	}
+	frontol.currentDocument.userValues.set("spisanie", realDisc);
+
+	// распределение скидок по позициям
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		//**** вычисляем процент для текущего товара
+		var koeffWare = standartProc;
+		var autoDiscActiveWare = false;
+		if (dPosition.storno === 1) {
+			koeffWare = 0;
+		} else {
+			var pDiscountPos = dPosition.discountPos;
+			for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+				if (pDiscountPos.marketingAction.code === 100000000) {  // ищем автоматические скидки на позицию
+					autoDiscActiveWare = true;
+					koeffWare = 0;
+				}
+			}
+			if (!autoDiscActiveWare) {
+				var wClassifier = dPosition.ware.classifier;
+				for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
+					if (wClassifier.code === 3) {  // ищем классификатор с кодом "3" (10 процентов бонусами)
+						koeffWare = 10;
+					} else if (wClassifier.code === 4) {  // ищем классификатор с кодом "4" (20 процентов бонусами)
+						if (bonusCardLevel === 2) {
+							koeffWare = 20;
+						} else {
+							koeffWare = 10;
+						}
+					}
+				}
+			}
+		}
+
+		var maxDiscWare = dPosition.sum * koeffWare / 100; // макс возможная скидка для данного товара
+		var finalSkid = Math.round(realDisc * maxDiscWare / maxBonusDiscForDocument * 100) / 100; // реальная сумма для списания с данного товара
+
+		var varName = "skidka" + dPosition.index;
+		frontol.currentDocument.userValues.set(varName, finalSkid);
+	}
+
+	frontol.currentDocument.recalculateAllDiscounts();
+}
+
+function bonusSkidWare(bonusPosition) {
+	var bonusPositionAspectString = getAspectString(bonusPosition);
+	var finalSkid = 0;
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		if (dPosition.ware.code === bonusPosition.ware.code  
+		&& dPosition.quantity === bonusPosition.quantity 
+		&& getAspectString(dPosition) === bonusPositionAspectString) {  
+			var varName = "skidka" + dPosition.index;
+			finalSkid =  frontol.currentDocument.userValues.get(varName);
+			break;
+		}
+	}
+	return finalSkid;
+}
+
+function getAspectString(position) {
+	var aspectString = "";
+	var pAspect = position.aspect;
+	for (pAspect.index = 1; pAspect.index <= pAspect.count;	pAspect.index ++) {
+		aspectString += pAspect.aspectText;
+	}
+	return aspectString;		
+}
+
+function beforeCloseDocument() {
+	if (frontol.currentDocument.type.name === "ВОЗВРАТ") {
+		return;
+	}
+	var bonusCardIndex = 0;
+	var dCard = frontol.currentDocument.card;
+	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+		if (dCard.value.length === 6) {
+			bonusCardIndex = dCard.index;
+			break;
+		}
+	}
+	if (bonusCardIndex === 0) {
+		return;
+	}
+	addBonus();	
+}
+
+function afterCloseDocument() {
+	if (frontol.currentDocument.type.name === "ВОЗВРАТ" || frontol.currentDocument.card.count === 0) {
+		return;
+	}
+	var bonusCardIndex = 0;
+	var BonusSumm = frontol.currentDocument.userValues.get("nachislenie");
+	var totalDisc = frontol.currentDocument.userValues.get("spisanie");
+	var Mess = "";
+	var dCard = frontol.currentDocument.card;
+	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+		if (dCard.value.length === 6) {
+			bonusCardIndex = dCard.index;
+			// начисление
+			if (BonusSumm > 0) {
+				dCard.counter.addValueByTypeCode(1, Math.ceil(BonusSumm));
+				Mess = Mess + "На чек начислено бонусных баллов: " + BonusSumm;
+			}
+			// списание
+			if (totalDisc > 0) {
+				dCard.counter.addValueByTypeCode(1, Math.ceil(-totalDisc));
+				Mess = Mess + "\nСписано бонусных баллов: " +  (Math.ceil(totalDisc));
+				// привязываем к карте классификатор стоп-листа списаний
+				dCard.classifier.bind(1);
+			}
+			break;
+		}
+	}
+	if (bonusCardIndex !== 0) {
+		frontol.actions.showMessage(Mess);
+	}
+}
+
+function getStandartProc(SummCheque) {
+	// процент (или сумма) для начисления
+	var standartProc = 0;
+	if (SummCheque>=200001){
+		standartProc = 5000;
+	} else if (SummCheque>=100001){
+		standartProc = 1.5;
+	} else if (SummCheque>=50001){
+		standartProc = 2;
+	} else if (SummCheque>=10001){
+		standartProc = 2.5;
+	} else if (SummCheque>=500){
+		standartProc = 3;
+	}
+	return standartProc;
+}
+
+function getSummRestrictWares(position) {
+	// расчет суммы товаров, запрещенных для начисления бонусов
+	var summRestrictWares = 0;
+	for (position.index = 1; position.index <= position.count; position.index ++){
+		if (position.storno === 1) {
+			continue;
+		}
+		var wClassifier = position.ware.classifier;
+		for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
+			if (wClassifier.code === 2) {
+				summRestrictWares += position.totalSum;
+			}
+		}
+	}
+	return summRestrictWares;
+}
+
+function addBonus() {
+	var summRestrictWares = getSummRestrictWares(frontol.currentDocument.position);
+	var standartProc = getStandartProc(frontol.currentDocument.totalSum - summRestrictWares);
+	var bonusTotal = 0;
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		if (dPosition.storno === 1) {
+			continue;
+		}
+		var noExtraBonus = false;
+		var pDiscountPos = dPosition.discountPos;
+		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+			if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
+				&& (pDiscountPos.sum > 0)) {
+				noExtraBonus = true;
+			}
+		}
+
+		var noBonus = false;
+		var extraBonus50 = false;
+		var wareBonus = 0;
+		var varName = "bonus" + frontol.currentDocument.position.index;
+		var wClassifier = dPosition.ware.classifier;
+		for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
+			if (wClassifier.code === 2) {
+				noBonus = true;
+			}
+			else if (wClassifier.code === 5) {
+				extraBonus50 = true;
+			}
+		}
+		if ((noBonus === false) && (standartProc !== 5000)) {
+			if ((extraBonus50 === true) && (noExtraBonus === false)) {
+				wareBonus = dPosition.totalSum * 50 / 100;
+			} else {
+				wareBonus = dPosition.totalSum * standartProc / 100;
+			}
+			wareBonus = Math.round(wareBonus * 100) / 100;
+		} else if ((noBonus === false) && (standartProc === 5000)) {
+			wareBonus = frontol.currentDocument.position.totalSum / (frontol.currentDocument.totalSum - summRestrictWares) * 5000;
+		}
+		frontol.currentDocument.userValues.set(varName, wareBonus);
+		bonusTotal += wareBonus;
+	}
+	if (standartProc === 5000) {
+		bonusTotal = 5000;
+	}
+	frontol.currentDocument.userValues.set("nachislenie", Math.ceil(bonusTotal));
+	return bonusTotal;	
+}
+
+function maxBonusPercent(summDokForSkid) {
+	// максимальный процент для списания
+	var standartProc = 0;
+	if (summDokForSkid >= 100001) {   
+		standartProc = 1;
+	} else if (summDokForSkid >= 50001) { 
+		standartProc = 2;
+	} else if (summDokForSkid >= 20001) {   
+		standartProc = 3;
+	} else if (summDokForSkid >= 5001) {   
+		standartProc = 4;
+	} else if (summDokForSkid >= 1001) { 
+		standartProc = 5;
+	} else if (summDokForSkid >= 10) { 
+		standartProc = 10;
+	}
+	return standartProc;
+}
+
