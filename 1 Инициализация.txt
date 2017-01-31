@@ -526,8 +526,7 @@ function addBonus() {
 	if (standartProc === 5000) {
 		bonusTotal = 5000;
 	}
-	frontol.currentDocument.userValues.set("nachislenie", Math.ceil(bonusTotal));
-	return bonusTotal;	
+	frontol.currentDocument.userValues.set("nachislenie", Math.ceil(bonusTotal));	
 }
 
 function maxBonusPercent(summDokForSkid) {

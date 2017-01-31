@@ -40,7 +40,7 @@ function printPosition(print) {
 		if (pDiscountPos.valueType == 0) {
 			var discPercent = print.formatPercent(pDiscountPos.value / dPosition.sum * 100);
 			actionName += " (" + discPercent + "%)";
-			discSumForPrint = print.formatCurrency(invertValue(pDiscountPos.value));
+			discSumForPrint = print.formatCurrency(invertNegativeValue(pDiscountPos.value));
 		} else {
 			actionName += " (" + pDiscountPos.value + "%)";
 			discSumForPrint = print.formatCurrency(dPosition.sum - dPosition.totalSum);
@@ -50,7 +50,7 @@ function printPosition(print) {
 	print.printLRString("  " + "—ÛÏÏ‡", print.formatCurrency(dPosition.totalSum), "_");
 }
 
-function invertValue(pDiscountPos) {
+function invertNegativeValue(pDiscountPos) {
 	var newValue = 0;
 	if (pDiscountPos.sum < 0) {
 		newValue = -pDiscountPos.value;
