@@ -113,7 +113,7 @@ function printFooter(print) {
 	if (bonusCardInserted === true) { 
 		print.printStringWordWrap("Ќа чек начислено бонусных баллов: " + BonusDelta);
 	} else {
-		print.printStringWordWrap("Ќа чек могло быть начислено бонусных баллов: " + BonusDelta);
+		print.printStringWordWrap("ћогло быть начислено бонусных баллов: " + BonusDelta);
 	}
 	var totalDisc = 0;
 	totalDisc = frontol.currentDocument.userValues.get("spisanie");
