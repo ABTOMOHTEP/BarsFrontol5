@@ -143,6 +143,8 @@ function beforeAddPayment(payment) {
 		}
 		frontol.currentDocument.addPayment(101, realDisc);
 		frontol.actions.cancel();
+	} else if (payment.type.name === "Сертификат") {
+		var sertNominal = frontol.actions.selectString("Выберите номинал серетификата", "500\n1000\n1500\n2000\n3000\n5000");
 	}
 }
 
