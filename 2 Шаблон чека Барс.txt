@@ -37,13 +37,14 @@ function printPosition(print) {
 			actionName = "Скидка";
 		}
 		var discSuff = "";
-		var discPercent = Math.round(dPosition.sum / pDiscountPos.value / 100) * 100;
 		var discSumForPrint = "";				
 		if (pDiscountPos.valueType == 0) {
+			var discPercent = Math.round(dPosition.sum / pDiscountPos.value / 100) * 100;
 			discSumForPrint = print.formatCurrency(pDiscountPos.value);
 			actionName += " (" + discPercent + "%)";
 		} else {
 			discSuff= "%";
+			actionName += " (" + pDiscountPos.value + "%)";
 			discSumForPrint = print.formatPercent(pDiscountPos.value);
 		}
 		var discValueForPrint;
