@@ -36,29 +36,29 @@ function printPosition(print) {
 		} else {
 			actionName = "Скидка";
 		}
-		var discSuff = "";
+		//var discSuff = "";
 		var discSumForPrint = "";				
 		if (pDiscountPos.valueType == 0) {
 			var discPercent = Math.round(dPosition.sum / pDiscountPos.value * 100) / 100;
-			discSumForPrint = print.formatCurrency(invertValue(pDiscountPos.value, print));
 			actionName += " (" + discPercent + "%)";
+			discSumForPrint = print.formatCurrency(invertValue(pDiscountPos.value));
 		} else {
-			discSuff= "%";
+			//discSuff= "%";
 			actionName += " (" + pDiscountPos.value + "%)";
-			discSumForPrint = print.formatPercent(invertValue(pDiscountPos.value, print));
+			discSumForPrint = print.formatPercent(invertValue(pDiscountPos.value)) + "%";
 		}
-		var discStringForPrint = "";
-		if (pDiscountPos.sum < 0) {
-			discStringForPrint = "+" + discSumForPrint;
-		} else {
-			discStringForPrint = "-" + discSumForPrint;
-		}
-		print.printLRStringLF("  " + actionName, discStringForPrint + discSuff, "_");
+		// var discStringForPrint = "";
+		// if (pDiscountPos.sum < 0) {
+		// 	discStringForPrint = "+" + discSumForPrint;
+		// } else {
+		// 	discStringForPrint = "-" + discSumForPrint;
+		// }
+		print.printLRStringLF("  " + actionName, discSumForPrint + discSuff, "_");
 	}
 	print.printLRString("  " + "Сумма", print.formatCurrency(dPosition.totalSum), "_");
 }
 
-function invertValue(pDiscountPos, print) {
+function invertValue(pDiscountPos) {
 	var newValue = 0;
 	if (pDiscountPos.sum < 0) {
 		newValue = -pDiscountPos.value;
