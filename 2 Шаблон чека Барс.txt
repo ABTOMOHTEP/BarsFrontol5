@@ -43,7 +43,7 @@ function printPosition(print) {
 			discSumForPrint = print.formatCurrency(invertNegativeValue(pDiscountPos.value));
 		} else {
 			actionName += " (" + pDiscountPos.value + "%)";
-			discSumForPrint = print.formatCurrency(dPosition.sum - dPosition.totalSum);
+			discSumForPrint = print.formatCurrency(dPosition.totalSum - dPosition.sumWithDiscs);
 		}
 		print.printLRStringLF("  " + actionName, discSumForPrint, "_");
 	}
