@@ -37,21 +37,18 @@ function printPosition(print) {
 			actionName = "Скидка";
 		}
 		var discSuff = "";
-		var discSumForPrint = "";				
 		if (pDiscountPos.valueType == 0) {
-			var discPercent = Math.round(dPosition.sum / pDiscountPos.value / 100) * 100;
-			discSumForPrint = print.formatCurrency(pDiscountPos.value);
+			var discPercent = Math.round(dPosition.sum / pDiscountPos.value * 100) / 100;
 			actionName += " (" + discPercent + "%)";
 		} else {
 			discSuff= "%";
 			actionName += " (" + pDiscountPos.value + "%)";
-			discSumForPrint = print.formatPercent(pDiscountPos.value);
 		}
 		var discValueForPrint;
 		if (pDiscountPos.sum < 0) {
-			discValueForPrint = "+" + -pDiscountPos.value;
+			discValueForPrint = "+" + print.formatCurrency(-pDiscountPos.value);
 		} else {
-			discValueForPrint = "-" + pDiscountPos.value;
+			discValueForPrint = "-" + print.formatCurrency(pDiscountPos.value);
 		}
 		print.printLRStringLF("  " + actionName, discValueForPrint + discSuff, "_");
 	}
