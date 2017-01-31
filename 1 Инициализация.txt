@@ -144,8 +144,22 @@ function beforeAddPayment(payment) {
 		frontol.currentDocument.addPayment(101, realDisc);
 		frontol.actions.cancel();
 	} else if (payment.type.name === "Сертификат") {
-		var sertNominal = frontol.actions.selectString("Выберите номинал серетификата", "500\n1000\n1500\n2000\n3000\n5000");
+		var sertificateString =  getSertificateString();
+		var sertNominal = frontol.actions.selectString("Выберите номинал сертификата", sertificateString, sertificateString);
+		if (sertNominal !== null) {
+			frontol.currentDocument.addPayment(5, sertNominal);
+		}
+		frontol.actions.cancel();		
 	}
+}
+
+function getSertificateString() {
+	return "500" + "\n" 
+		+ "1000" + "\n" 
+		+ "1500" + "\n" 
+		+ "2000" + "\n" 
+		+ "3000" + "\n" 
+		+ "5000";
 }
 
 function beforeStornoPayment(payment) {
