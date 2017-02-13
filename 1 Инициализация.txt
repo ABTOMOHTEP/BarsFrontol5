@@ -267,8 +267,8 @@ function calculateBonusMacro() {
 		} else if ((dPosition.sum - dPosition.totalSum) !== 0) {
 			var pDiscountPos = dPosition.discountPos;
 			for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-				if (pDiscountPos.marketingAction.code === 100000000) {  // ищем автоматические скидки на позицию
-					// добавить проверку на сумму скидки больше нуля
+				if (pDiscountPos.marketingAction.code === 100000000 // ищем автоматические ненулевые скидки на позицию
+					&& pDiscountPos.sum > 0) {
 					autoDiscActive = true;
 				}
 			}
@@ -341,8 +341,8 @@ function calculateBonusMacro() {
 			var pDiscountPos = dPosition.discountPos;
 			if ((dPosition.sum - dPosition.totalSum) !== 0) {
 				for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-					if (pDiscountPos.marketingAction.code === 100000000) {  // ищем автоматические скидки на позицию
-						// добавить проверку на сумму скидки больше нуля
+					if (pDiscountPos.marketingAction.code === 100000000 // ищем автоматические ненулевые скидки на позицию
+						&& pDiscountPos.sum > 0) {
 						autoDiscActiveWare = true;
 						koeffWare = 0;
 					}
