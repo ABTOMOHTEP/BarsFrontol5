@@ -338,10 +338,12 @@ function calculateBonusMacro() {
 			koeffWare = 0;
 		} else {
 			var pDiscountPos = dPosition.discountPos;
-			for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-				if (pDiscountPos.marketingAction.code === 100000000) {  // ищем автоматические скидки на позицию
-					autoDiscActiveWare = true;
-					koeffWare = 0;
+			if ((dPosition.sum - dPosition.totalSum) !== 0) {
+				for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+					if (pDiscountPos.marketingAction.code === 100000000) {  // ищем автоматические скидки на позицию
+						autoDiscActiveWare = true;
+						koeffWare = 0;
+					}
 				}
 			}
 			if (!autoDiscActiveWare) {
