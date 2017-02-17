@@ -1,5 +1,5 @@
 function printHeader(print) {
-	print.printLRStringLF("=","=","=");
+	print.printLRStringLF("-","-","-");
 }
 
 function printPosition(print) {
