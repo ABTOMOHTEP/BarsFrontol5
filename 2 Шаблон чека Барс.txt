@@ -4,10 +4,10 @@ function printHeader(print) {
 
 function printPosition(print) {
 	var dPosition = frontol.currentDocument.position;
-	if (dPosition.storno === 1) {
-		print.printCenterString("—“Œ–ÕŒ", " ");
-	}
-	print.printString(dPosition.number + ". " + dPosition.ware.text);
+	// if (dPosition.storno === 1) {
+	// 	print.printCenterString("—“Œ–ÕŒ", " ");
+	// }
+	//print.printString(dPosition.number + ". " + dPosition.ware.text);
 	if (dPosition.storno === 1) {
 		return;
 	}
@@ -20,7 +20,8 @@ function printPosition(print) {
 			}
 		}
 	}
-	print.printLRStringLF("  " + print.formatQuantity(dPosition.quantity), print.formatCurrency(dPosition.sum),"_");
+	//print.printLRStringLF("  " + print.formatQuantity(dPosition.quantity), print.formatCurrency(dPosition.sum),"_");
+	print.printLRStringLF(" ÷≈Õ¿", "=" + print.formatCurrency(dPosition.ware.price)," ");
 	
 	var pDiscountPos = dPosition.discountPos;
 	for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index++) {
@@ -45,9 +46,9 @@ function printPosition(print) {
 			actionName += " (" + pDiscountPos.value + "%)";
 			discSumForPrint = print.formatCurrency(pDiscountPos.sum);
 		}
-		print.printLRStringLF("  " + actionName, discSumForPrint, "_");
+		print.printLRStringLF(" " + actionName, discSumForPrint, " ");
 	}
-	print.printLRString("  " + "—ÛÏÏ‡", print.formatCurrency(dPosition.totalSum), "_");
+	print.printLRString(" " + "—ÛÏÏ‡", print.formatCurrency(dPosition.totalSum), " ");
 }
 
 function invertNegativeValue(pDiscountPos) {
