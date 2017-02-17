@@ -104,7 +104,7 @@ function printFooter(print) {
 			var cCounter = dCard.counter;
 			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
 				if (cCounter.type.code === 1) {
-					print.printLRStringLF("Баланс бонусов без учета этого чека: ", print.formatCurrency(cCounter.value), "_");
+					print.printLRStringLF("Баланс бонусов без учета этого чека: ", Math.ceil(cCounter.value), "_");
 					bonusCardInserted = true;
 				}
 			}
