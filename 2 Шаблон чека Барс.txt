@@ -35,7 +35,7 @@ function printPosition(print) {
 		if(pDiscountPos.marketingAction.text != "") {
 			actionName = pDiscountPos.marketingAction.text;
 		} else {
-			actionName = "Скидка";
+			actionName = "СКИДКА";
 		}
 		var discSumForPrint = "";				
 		if (pDiscountPos.valueType == 0) {
@@ -48,7 +48,7 @@ function printPosition(print) {
 		}
 		print.printLRStringLF(" " + actionName, "=" + discSumForPrint, " ");
 	}
-	print.printLRString(" " + "Сумма со скидками", "=" + print.formatCurrency(dPosition.totalSum), " ");
+	print.printLRString(" " + "СУММА СО СКИДКАМИ", "=" + print.formatCurrency(dPosition.totalSum), " ");
 	print.printLRStringLF("-","-","-");
 }
 
@@ -71,26 +71,26 @@ function printFooter(print) {
 			+ dAspect.text);
 		}
 	}
-	print.printLRStringLF("Итог", "=" + print.formatCurrency(frontol.currentDocument.sum), " ");
+	print.printLRStringLF("ИТОГ", "=" + print.formatCurrency(frontol.currentDocument.sum), " ");
 	if (frontol.currentDocument.sum !== frontol.currentDocument.totalSum) {
-		print.printLRStringLF("Сумма со скидками", "=" + print.formatCurrency(frontol.currentDocument.totalSum)," ");
+		print.printLRStringLF("СУММА СО СКИДКАМИ", "=" + print.formatCurrency(frontol.currentDocument.totalSum)," ");
 	}
 	print.printLRStringLF("-", "-", "-");
 	var dTax = frontol.currentDocument.tax;
 	for (dTax.index = 1; dTax.index <= dTax.count; dTax.index ++) {
 		if (dTax.sum !== 0) {
-			print.printLRString("Включая налоги " + dTax.taxRateText, "=" + print.formatCurrency(dTax.sum), " ");
+			print.printLRString("ВКЛЮЧАЯ НАЛОГИ " + dTax.taxRateText, "=" + print.formatCurrency(dTax.sum), " ");
 		}
 		print.printLRStringLF("-", "-", "-");
 	}
-	print.printStringWordWrap("Оплата");
+	print.printStringWordWrap("ОПЛАТА");
 	var dPayment = frontol.currentDocument.payment;
 	for (dPayment.index = 1; dPayment.index <= dPayment.count; dPayment.index++) {
 		if(dPayment.sumInBaseCurrency > 0) {
 			print.printLRString("  " + dPayment.type.text, "=" 
 				+ print.formatCurrency(dPayment.sumInBaseCurrency), " ");
 		} else {
-			print.printStringWordWrap("Сдача");
+			print.printStringWordWrap("СДАЧА");
 			print.printLRString("  " + dPayment.type.text, "=" 
 				+ print.formatCurrency(-dPayment.sumInBaseCurrency), " ");
 		}
