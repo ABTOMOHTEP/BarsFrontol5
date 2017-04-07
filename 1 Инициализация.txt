@@ -209,7 +209,7 @@ function beforeAddPayment(payment) {
 		frontol.actions.cancel();
 	// оплата сертификатами с фиксированным номиналом
 	} else if (payment.type.name === "Сертификат") {
-		var sertificateString =  getSertificateString();
+		var sertificateString = getSertificateString();
 		var sertNominal = frontol.actions.selectString("Выберите номинал сертификата", sertificateString, sertificateString);
 		if (sertNominal !== null) {
 			frontol.currentDocument.addPayment(fixedNominalSertificatePaymentCode(), sertNominal);
@@ -475,7 +475,7 @@ function raylwayDiscountWare(docPosition) {
 		&& dPosition.quantity === docPosition.quantity 
 		&& getAspectString(dPosition) === discountPositionAspectString) {  
 			var varName = "railwayDiscount" + dPosition.index;
-			finalSkid =  frontol.currentDocument.userValues.get(varName);
+			finalSkid = frontol.currentDocument.userValues.get(varName);
 			break;
 		}
 	}
@@ -491,7 +491,7 @@ function bonusSkidWare(bonusPosition) {
 		&& dPosition.quantity === bonusPosition.quantity 
 		&& getAspectString(dPosition) === bonusPositionAspectString) {  
 			var varName = "skidka" + dPosition.index;
-			finalSkid =  frontol.currentDocument.userValues.get(varName);
+			finalSkid = frontol.currentDocument.userValues.get(varName);
 			break;
 		}
 	}
@@ -534,7 +534,7 @@ function afterCloseDocument() {
 			// списание
 			if (totalDisc > 0) {
 				dCard.counter.addValueByTypeCode(1, Math.ceil(-totalDisc));
-				Mess = Mess + "\nСписано бонусных баллов: " +  Math.ceil(totalDisc);
+				Mess = Mess + "\nСписано бонусных баллов: " + Math.ceil(totalDisc);
 				// привязываем к карте классификатор стоп-листа списаний
 				dCard.classifier.bind(1);
 			}
