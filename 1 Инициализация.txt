@@ -15,7 +15,7 @@ function beforeAddCard(card) {
 	if (isBonusCard(card)) {
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (dCard.value.length === 6) {
-				frontol.actions.showMessage("1");
+				frontol.actions.showMessage("Бонусная карта уже введена!");
 				frontol.actions.cancel();
 			}
 		}
