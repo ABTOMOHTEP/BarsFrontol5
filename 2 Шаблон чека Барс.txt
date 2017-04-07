@@ -4,10 +4,6 @@ function printHeader(print) {
 
 function printPosition(print) {
 	var dPosition = frontol.currentDocument.position;
-	// if (dPosition.storno === 1) {
-	// 	print.printCenterString("—“Œ–ÕŒ", " ");
-	// }
-	//print.printString(dPosition.number + ". " + dPosition.ware.text);
 	if (dPosition.storno === 1) {
 		return;
 	}
@@ -20,7 +16,6 @@ function printPosition(print) {
 			}
 		}
 	}
-	//print.printLRStringLF("  " + print.formatQuantity(dPosition.quantity), print.formatCurrency(dPosition.sum),"_");
 	print.printLRStringLF(" ÷≈Õ¿", "=" + print.formatCurrency(dPosition.ware.price)," ");
 	
 	var pDiscountPos = dPosition.discountPos;
@@ -63,7 +58,6 @@ function invertNegativeValue(pDiscountPos) {
 }
 
 function printFooter(print) {
-	//print.printLRStringLF("=", "=", "=");
 	var dAspect = frontol.currentDocument.aspect;
 	for(dAspect.index = 1; dAspect.index <= dAspect.count; dAspect.index ++) {
 		if (dAspect.text !== "") {
