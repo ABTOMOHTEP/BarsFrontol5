@@ -54,30 +54,46 @@ function afterAddCard(card) {
 }
 
 function beforeChangePosition(position) {
-	var dPosition = frontol.currentDocument.position;
-	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-		var pDiscountPos = frontol.currentDocument.position.discountPos;
-		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-			if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
-				&& (pDiscountPos.sum > 0)) {
-				frontol.actions.showMessage("Запрещено изменять позиции \n в чеке со списанием бонусами!");
-				frontol.actions.cancel();
-			}
-		}
-	}
+	checkDiscountsForPosotionsLock();
+	// var dPosition = frontol.currentDocument.position;
+	// for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+	// 	var pDiscountPos = frontol.currentDocument.position.discountPos;
+	// 	for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+	// 		if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
+	// 			&& (pDiscountPos.sum > 0)) {
+	// 			frontol.actions.showMessage("Запрещено изменять позиции \n в чеке со списанием бонусами!");
+	// 			frontol.actions.cancel();
+	// 		}
+	// 	}
+	// }
 }
 
 function beforeAddPosition(position) {
 	if(frontol.currentDocument.type.name === "ВОЗВРАТ") {
 		return 0;
 	}
+	checkDiscountsForPosotionsLock();
+	// var dPosition = frontol.currentDocument.position;
+	// for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+	// 	var pDiscountPos = frontol.currentDocument.position.discountPos;
+	// 	for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+	// 		if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
+	// 			&& (pDiscountPos.sum > 0)) {
+	// 			frontol.actions.showMessage("Запрещено добавлять позиции \n в чек со списанием бонусами!");
+	// 			frontol.actions.cancel();
+	// 		}
+	// 	}
+	// }	
+}
+
+function checkDiscountsForPosotionsLock() {
 	var dPosition = frontol.currentDocument.position;
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
 		var pDiscountPos = frontol.currentDocument.position.discountPos;
 		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
 			if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
 				&& (pDiscountPos.sum > 0)) {
-				frontol.actions.showMessage("Запрещено добавлять позиции \n в чек со списанием бонусами!");
+				frontol.actions.showMessage("Запрещено добавлять/изменять позиции \n в чеке со списанием бонусами или картами РЖД!");
 				frontol.actions.cancel();
 			}
 		}
