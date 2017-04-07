@@ -328,9 +328,9 @@ function calculateBonusMacro() {
 			continue;
 		}
 		summRealDisc += dPosition.totalSumDiscount;
-		if (dPosition.ware.code === 0) {		//продажи по свободной цене
+		if (dPosition.ware.code === 0) {		// продажи по свободной цене
 			summDiscWares += dPosition.sum;
-		} else if (dPosition.ware.maxDiscount !== 0) {		//обычные продажи
+		} else if (dPosition.ware.maxDiscount !== 0) {		// обычные продажи
 			summDiscWares += dPosition.sum * dPosition.ware.maxDiscount / 100;
 		}
 		if (dPosition.sum - dPosition.totalSum === 0) {
