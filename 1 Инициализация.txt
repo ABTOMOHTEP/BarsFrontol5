@@ -421,12 +421,23 @@ function calculateRailwayDiscount() {
 	}
 	// todo
 
+	frontol.currentDocument.recalculateAllDiscounts();
 }
 
 function raylwayDiscountWare(docPosition) {
-
-	// todo
-	
+	var discountPositionAspectString = getAspectString(bonusPosition);
+	var finalSkid = 0;
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		if (dPosition.ware.code === bonusPosition.ware.code  
+		&& dPosition.quantity === bonusPosition.quantity 
+		&& getAspectString(dPosition) === discountPositionAspectString) {  
+			var varName = "railwayDiscount" + dPosition.index;
+			finalSkid =  frontol.currentDocument.userValues.get(varName);
+			break;
+		}
+	}
+	return finalSkid;	
 }
 
 function bonusSkidWare(bonusPosition) {
