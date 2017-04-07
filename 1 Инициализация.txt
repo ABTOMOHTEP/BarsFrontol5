@@ -19,16 +19,14 @@ function beforeAddCard(card) {
 				frontol.actions.cancel();
 			}
 		}
-	}
-	else if (isSertificate(card)) {
+	} else if (isSertificate(card)) {
 		for (card.classifier.index = 1; card.classifier.index <= card.classifier.count; card.classifier.index ++) {
 			if (card.classifier.code === 1) {
 				frontol.actions.showMessage("С сертификата уже списывались средства!");
 				frontol.actions.cancel();
 			}
 		}
-	}
-	else if (isRailwayCard(card)) {
+	} else if (isRailwayCard(card)) {
 		for (card.classifier.index = 1; card.classifier.index <= card.classifier.count; card.classifier.index ++) {
 			if (isRailwayCard(dCard)) {
 				frontol.actions.showMessage("Карта РЖД уже введена!");
@@ -48,8 +46,7 @@ function afterAddCard(card) {
 		for (сCounter.index = 1; сCounter.index <= сCounter.count; сCounter.index ++) {
 			if (сCounter.type.code === 1) {
 				bonusSumm = Math.floor(сCounter.value);
-			}
-			else if (сCounter.type.code === cardLevelCounterTypeCode()) {
+			} else if (сCounter.type.code === cardLevelCounterTypeCode()) {
 				buySumm = Math.floor(сCounter.value);
 				if (buySumm >= cardLevelTwoLimit()) {
 					cardLevel = cardLevelTwo;
@@ -59,8 +56,7 @@ function afterAddCard(card) {
 		frontol.actions.showMessage("На карте накоплено баллов: " + bonusSumm
 			+ "\n Сумма покупок по карте: " + buySumm
 			+ "\n Уровень карты: " + cardLevel);
-	}
-	else if (isRailwayCard(card)) {
+	} else if (isRailwayCard(card)) {
 		calculateRailwayDiscount();
 	}
 }
@@ -290,8 +286,7 @@ function calculateBonusMacro() {
 			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
 				if (cCounter.type.code === 1) {
 					summBonusClient = cCounter.value;
-				}
-				else if (cCounter.type.code === cardLevelCounterTypeCode()) {
+				} else if (cCounter.type.code === cardLevelCounterTypeCode()) {
 					var buySumm = Math.floor(cCounter.value);
 					if (buySumm >= cardLevelTwoLimit()) {
 						bonusCardLevel = 2;
@@ -320,7 +315,7 @@ function calculateBonusMacro() {
 	var summDiscWares = 0;   // сумма, разрешенная для списания
 	var summRealDisc = 0;    // сумма примененных скидок на чек
 	var summDokForSkid = 0;  // сумма документа для расчета процента скидки
-	var autoDiscActive;
+	var autoDiscActive = false;
 	var summWares10 = 0;
 	var summWares20 = 0;
 	var dPosition = frontol.currentDocument.position;
@@ -361,8 +356,7 @@ function calculateBonusMacro() {
 				if (dPosition.sum - dPosition.totalSum === 0) {
 					if (bonusCardLevel === 2) {
 						summWares20 += dPosition.sum;
-					}
-					else {
+					} else {
 						summWares10 += dPosition.sum;
 					}
 				}
@@ -606,8 +600,7 @@ function addBonus() {
 		for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
 			if (wClassifier.code === 2) {
 				noBonus = true;
-			}
-			else if (wClassifier.code === 5) {
+			} else if (wClassifier.code === 5) {
 				extraBonus50 = true;
 			}
 		}

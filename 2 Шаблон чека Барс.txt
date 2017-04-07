@@ -1,6 +1,6 @@
 /* global frontol, Icon, Button, DialogResult, ActiveXObject */
 function printHeader(print) {
-	print.printLRStringLF("-","-","-");
+	print.printLRStringLF("-", "-", "-");
 }
 
 function printPosition(print) {
@@ -17,7 +17,7 @@ function printPosition(print) {
 			}
 		}
 	}
-	print.printLRStringLF(" ÷≈Õ¿", "=" + print.formatCurrency(dPosition.ware.price)," ");
+	print.printLRStringLF(" ÷≈Õ¿", "=" + print.formatCurrency(dPosition.ware.price), " ");
 	
 	var pDiscountPos = dPosition.discountPos;
 	for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index++) {
@@ -45,7 +45,7 @@ function printPosition(print) {
 		print.printLRStringLF(" " + actionName, "=" + discSumForPrint, " ");
 	}
 	print.printLRString(" —”ÃÃ¿ —Œ — »ƒ ¿Ã»", "=" + print.formatCurrency(dPosition.totalSum), " ");
-	print.printLRStringLF("-","-","-");
+	print.printLRStringLF("-", "-", "-");
 }
 
 function invertNegativeValue(pDiscountPos) {
@@ -68,7 +68,7 @@ function printFooter(print) {
 	}
 	print.printLRStringLF("»“Œ√", "=" + print.formatCurrency(frontol.currentDocument.sum), " ");
 	if (frontol.currentDocument.sum !== frontol.currentDocument.totalSum) {
-		print.printLRStringLF("—”ÃÃ¿ —Œ — »ƒ ¿Ã»", "=" + print.formatCurrency(frontol.currentDocument.totalSum)," ");
+		print.printLRStringLF("—”ÃÃ¿ —Œ — »ƒ ¿Ã»", "=" + print.formatCurrency(frontol.currentDocument.totalSum), " ");
 	}
 	print.printLRStringLF("-", "-", "-");
 	var dTax = frontol.currentDocument.tax;
