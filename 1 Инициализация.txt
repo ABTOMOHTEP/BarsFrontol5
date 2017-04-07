@@ -14,7 +14,7 @@ function beforeAddCard(card) {
 	var dCard = frontol.currentDocument.card;
 	if (isBonusCard(card)) {
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-			if (dCard.value.length === 6) {
+			if (isBonusCard(dCard)) {
 				frontol.actions.showMessage("Áîíóñíàÿ êàðòà óæå ââåäåíà!");
 				frontol.actions.cancel();
 			}
@@ -43,15 +43,16 @@ function afterAddCard(card) {
 		var bonusSumm = 0;
 		var buySumm = 0;
 		var cardLevel = 1;
+		var cardLevelTwo = 2;
 		var ñCounter = card.counter;
 		for (ñCounter.index = 1; ñCounter.index <= ñCounter.count; ñCounter.index ++) {
 			if (ñCounter.type.code === 1) {
 				bonusSumm = Math.floor(ñCounter.value);
 			}
-			else if (ñCounter.type.code === 3) {
+			else if (ñCounter.type.code === cardLevelCounterTypeCode()) {
 				buySumm = Math.floor(ñCounter.value);
-				if (buySumm >= 100000) {
-					cardLevel = 2;
+				if (buySumm >= cardLevelTwoLimit()) {
+					cardLevel = cardLevelTwo;
 				}
 			}
 		}
@@ -62,6 +63,21 @@ function afterAddCard(card) {
 	else if (isRailwayCard(card)) {
 		calculateRailwayDiscount();
 	}
+}
+
+function cardLevelCounterTypeCode() {
+	var cardLevelCounterTypeCode = 3;
+	return cardLevelCounterTypeCode;
+}
+
+function sertificateCounterTypeCode() {
+	var sertificateCounterTypeCode = 2;
+	return sertificateCounterTypeCode;
+}
+
+function cardLevelTwoLimit() {
+	var cardLevelTwoLimit = 100000;
+	return cardLevelTwoLimit;
 }
 
 function isRailwayCard(card) {
@@ -114,19 +130,23 @@ function discountActive(discountCode) {
 }
 
 function bonusDiscountCode() {
-	return 27;
+	var bonusDiscountCode = 27;
+	return bonusDiscountCode;
 }
 
 function railwayDiscountCode() {
-	return 29;
+	var railwayDiscountCode = 29;
+	return railwayDiscountCode;
 }
 
 function manualDiscountCode() {
-	return 28;
+	var manualDiscountCode = 28;
+	return manualDiscountCode;
 }
 
 function automaticDiscountCode() {
-	return 100000000;
+	var automaticDiscountCode = 100000000;
+	return automaticDiscountCode;
 }
 
 function beforeAddPayment(payment) {
@@ -147,7 +167,7 @@ function beforeAddPayment(payment) {
 		var dCard = frontol.currentDocument.card;
 		var cCounter = dCard.counter;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-			if (dCard.value.length === 8) {
+			if (isSertificate(dCard)) {
 				var cClassifier = dCard.classifier;
 				for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
 					if (cClassifier.code === 1) {
@@ -156,7 +176,7 @@ function beforeAddPayment(payment) {
 					}
 				}				
 				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-					if (cCounter.type.code === 2) {
+					if (cCounter.type.code === sertificateCounterTypeCode()) {
 						totalSertificatesRemain += cCounter.value;
 					}
 				}
