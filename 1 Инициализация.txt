@@ -42,7 +42,7 @@ function afterAddCard(card) {
 		var bonusSumm = 0;
 		var buySumm = 0;
 		var cardLevel = 1;
-		ÒCounter = card.counter;
+		var ÒCounter = card.counter;
 		for (ÒCounter.index = 1; ÒCounter.index <= ÒCounter.count; ÒCounter.index ++) {
 			if (ÒCounter.type.code === 1) {
 				bonusSumm = Math.floor(ÒCounter.value);
