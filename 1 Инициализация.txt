@@ -30,27 +30,37 @@ function beforeAddCard(card) {
 }
 
 function afterAddCard(card) {
-	if ((card.value.length !== 6) || (card.value.length !== 16)) {
-		return 0;
-	}
-
-	var bonusSumm = 0;
-	var buySumm = 0;
-	var cardLevel = 1;
-	for (card.counter.index = 1; card.counter.index <= card.counter.count; card.counter.index ++) {
-		if (card.counter.type.code === 1) {
-			bonusSumm = Math.floor(card.counter.value);
-		}
-		else if (card.counter.type.code === 3) {
-			buySumm = Math.floor(card.counter.value);
-			if (buySumm >= 100000) {
-				cardLevel = 2;
+	if (isBonusCard(card)) {
+		var bonusSumm = 0;
+		var buySumm = 0;
+		var cardLevel = 1;
+		cardCounter = card.counter;
+		for (cardCounter.index = 1; cardCounter.index <= cardCounter.count; cardCounter.index ++) {
+			if (cardCounter.type.code === 1) {
+				bonusSumm = Math.floor(cardCounter.value);
+			}
+			else if (cardCounter.type.code === 3) {
+				buySumm = Math.floor(cardCounter.value);
+				if (buySumm >= 100000) {
+					cardLevel = 2;
+				}
 			}
 		}
+		frontol.actions.showMessage("На карте накоплено баллов: " + bonusSumm
+			+ "\n" + "Сумма покупок по карте: " + buySumm
+			+ "\n" + "Уровень карты: " + cardLevel);
 	}
-	frontol.actions.showMessage("На карте накоплено баллов: " + bonusSumm
-		+ "\n" + "Сумма покупок по карте: " + buySumm
-		+ "\n" + "Уровень карты: " + cardLevel);
+	else if (isRailwayCard(card)) {
+		calculateRailwayDiscount();
+	} 
+}
+
+function isRailwayCard(card) {
+	return (card.value.length === 16); 
+}
+
+function isBonusCard(card) {
+	return (card.value.length === 6); 
 }
 
 function beforeChangePosition(position) {
