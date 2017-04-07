@@ -11,7 +11,7 @@ function init() {
 
 function beforeAddCard(card) {
 	var dCard = frontol.currentDocument.card;
-	if (card.value.length === 6) {
+	if (isBonusCard(card)) {
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (dCard.value.length === 6) {
 				frontol.actions.showMessage("Бонусная карта уже введена!");
@@ -19,13 +19,21 @@ function beforeAddCard(card) {
 			}
 		}
 	}
-	else if (card.value.length === 8) {
+	else if (isSertificate(card)) {
 		for (card.classifier.index = 1; card.classifier.index <= card.classifier.count; card.classifier.index ++) {
 			if (card.classifier.code === 1) {
 				frontol.actions.showMessage("С сертификата уже списывались средства!");
 				frontol.actions.cancel();
 			}
 		}
+	}
+	else if (isRailwayCard(card)) {
+		for (card.classifier.index = 1; card.classifier.index <= card.classifier.count; card.classifier.index ++) {
+			if (isRailwayCard(dCard)) {
+				frontol.actions.showMessage("Карта РЖД уже введена!");
+				frontol.actions.cancel();
+			}
+		}	
 	}
 }
 
@@ -34,13 +42,13 @@ function afterAddCard(card) {
 		var bonusSumm = 0;
 		var buySumm = 0;
 		var cardLevel = 1;
-		cardCounter = card.counter;
-		for (cardCounter.index = 1; cardCounter.index <= cardCounter.count; cardCounter.index ++) {
-			if (cardCounter.type.code === 1) {
-				bonusSumm = Math.floor(cardCounter.value);
+		сCounter = card.counter;
+		for (сCounter.index = 1; сCounter.index <= сCounter.count; сCounter.index ++) {
+			if (сCounter.type.code === 1) {
+				bonusSumm = Math.floor(сCounter.value);
 			}
-			else if (cardCounter.type.code === 3) {
-				buySumm = Math.floor(cardCounter.value);
+			else if (сCounter.type.code === 3) {
+				buySumm = Math.floor(сCounter.value);
 				if (buySumm >= 100000) {
 					cardLevel = 2;
 				}
@@ -63,19 +71,12 @@ function isBonusCard(card) {
 	return (card.value.length === 6); 
 }
 
+function isSertificate(card) {
+	return (card.value.length === 8); 
+}
+
 function beforeChangePosition(position) {
 	checkDiscountsForPosotionsLock();
-	// var dPosition = frontol.currentDocument.position;
-	// for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-	// 	var pDiscountPos = frontol.currentDocument.position.discountPos;
-	// 	for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-	// 		if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
-	// 			&& (pDiscountPos.sum > 0)) {
-	// 			frontol.actions.showMessage("Запрещено изменять позиции \n в чеке со списанием бонусами!");
-	// 			frontol.actions.cancel();
-	// 		}
-	// 	}
-	// }
 }
 
 function beforeAddPosition(position) {
@@ -83,17 +84,6 @@ function beforeAddPosition(position) {
 		return 0;
 	}
 	checkDiscountsForPosotionsLock();
-	// var dPosition = frontol.currentDocument.position;
-	// for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-	// 	var pDiscountPos = frontol.currentDocument.position.discountPos;
-	// 	for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-	// 		if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
-	// 			&& (pDiscountPos.sum > 0)) {
-	// 			frontol.actions.showMessage("Запрещено добавлять позиции \n в чек со списанием бонусами!");
-	// 			frontol.actions.cancel();
-	// 		}
-	// 	}
-	// }	
 }
 
 function checkDiscountsForPosotionsLock() {
@@ -401,6 +391,8 @@ function calculateBonusMacro() {
 }
 
 function calculateRailwayDiscount() {
+
+	// todo
 
 }
 
