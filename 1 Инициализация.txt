@@ -60,7 +60,7 @@ function afterAddCard(card) {
 	}
 	else if (isRailwayCard(card)) {
 		calculateRailwayDiscount();
-	} 
+	}
 }
 
 function isRailwayCard(card) {
@@ -68,7 +68,7 @@ function isRailwayCard(card) {
 }
 
 function isBonusCard(card) {
-	return (card.value.length === 6); 
+	return (card.value.length === 6);
 }
 
 function isSertificate(card) {
