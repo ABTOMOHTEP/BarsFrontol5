@@ -543,15 +543,15 @@ function afterCloseDocument() {
 function getStandartProc(SummCheque) {
 	// процент (или сумма) для начисления
 	var standartProc = 0;
-	if (SummCheque>=200001){
+	if (SummCheque >= 200001) {
 		standartProc = 5000;
-	} else if (SummCheque>=100001){
+	} else if (SummCheque >= 100001) {
 		standartProc = 1.5;
-	} else if (SummCheque>=50001){
+	} else if (SummCheque >= 50001) {
 		standartProc = 2;
-	} else if (SummCheque>=10001){
+	} else if (SummCheque >= 10001) {
 		standartProc = 2.5;
-	} else if (SummCheque>=500){
+	} else if (SummCheque >= 500) {
 		standartProc = 3;
 	}
 	return standartProc;
@@ -560,7 +560,7 @@ function getStandartProc(SummCheque) {
 function getSummRestrictWares(position) {
 	// расчет суммы товаров, запрещенных для начисления бонусов
 	var summRestrictWares = 0;
-	for (position.index = 1; position.index <= position.count; position.index ++){
+	for (position.index = 1; position.index <= position.count; position.index ++) {
 		if (position.storno === 1) {
 			continue;
 		}
