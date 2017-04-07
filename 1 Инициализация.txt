@@ -8,7 +8,7 @@ function init() {
 	frontol.addEventListener("closeDocument", "beforeCloseDocument", true);
 	frontol.addEventListener("closeDocument", "afterCloseDocument", false);
 }
-
+// тест
 function beforeAddCard(card) {
 	var dCard = frontol.currentDocument.card;
 	if (card.value.length === 6) {
