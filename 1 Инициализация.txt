@@ -76,23 +76,22 @@ function isSertificate(card) {
 }
 
 function beforeChangePosition(position) {
-	checkDiscountsForPosotionsLock();
+	checkDiscountsForPositionsLock();
 }
 
 function beforeAddPosition(position) {
 	if(frontol.currentDocument.type.name === "ВОЗВРАТ") {
 		return 0;
 	}
-	checkDiscountsForPosotionsLock();
+	checkDiscountsForPositionsLock();
 }
 
-function checkDiscountsForPosotionsLock() {
+function checkDiscountsForPositionsLock() {
 	var dPosition = frontol.currentDocument.position;
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
 		var pDiscountPos = frontol.currentDocument.position.discountPos;
 		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-			if (((pDiscountPos.marketingAction.code === bonusDiscountCode()) 
-				|| (pDiscountPos.marketingAction.code === railwayDiscountCode())) 
+			if ((discountActive(bonusDiscountCode()) || discountActive(railwayDiscountCode())) 
 				&& (pDiscountPos.sum > 0)) {
 				frontol.actions.showMessage("Запрещено добавлять/изменять позиции \n" 
 					+ "в чеке со списанием бонусами или картами РЖД!");
@@ -100,6 +99,24 @@ function checkDiscountsForPosotionsLock() {
 			}
 		}
 	}	
+}
+
+function discountActive(discountCode) {
+	bonusDiscountActive = false;
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		var pDiscountPos = frontol.currentDocument.position.discountPos;
+		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+			if (pDiscountPos.marketingAction.code === discountCode) { 
+				bonusDiscountActive = true;
+			}
+		}
+	}
+	return bonusDiscountActive;
+}
+
+function railwayDiscountActive() {
+
 }
 
 function bonusDiscountCode() {
