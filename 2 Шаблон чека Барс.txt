@@ -28,7 +28,7 @@ function printPosition(print) {
 			continue;
 		}
 		var actionName = "";
-		if(pDiscountPos.marketingAction.text !== "") {
+		if (pDiscountPos.marketingAction.text !== "") {
 			actionName = pDiscountPos.marketingAction.text;
 		} else {
 			actionName = "— »ƒ ¿";
@@ -60,7 +60,7 @@ function invertNegativeValue(pDiscountPos) {
 
 function printFooter(print) {
 	var dAspect = frontol.currentDocument.aspect;
-	for(dAspect.index = 1; dAspect.index <= dAspect.count; dAspect.index ++) {
+	for (dAspect.index = 1; dAspect.index <= dAspect.count; dAspect.index ++) {
 		if (dAspect.text !== "") {
 			print.printStringWordWrap(dAspect.aspectText + ": " 
 			+ dAspect.text);
@@ -81,7 +81,7 @@ function printFooter(print) {
 	print.printStringWordWrap("ŒœÀ¿“¿");
 	var dPayment = frontol.currentDocument.payment;
 	for (dPayment.index = 1; dPayment.index <= dPayment.count; dPayment.index++) {
-		if(dPayment.sumInBaseCurrency > 0) {
+		if (dPayment.sumInBaseCurrency > 0) {
 			print.printLRString("  " + dPayment.type.text, "=" 
 				+ print.formatCurrency(dPayment.sumInBaseCurrency), " ");
 		} else {
