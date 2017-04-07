@@ -1,3 +1,4 @@
+/* global frontol, Icon, Button, DialogResult, ActiveXObject */
 function printHeader(print) {
 	print.printLRStringLF("-","-","-");
 }
@@ -27,13 +28,13 @@ function printPosition(print) {
 			continue;
 		}
 		var actionName = "";
-		if(pDiscountPos.marketingAction.text != "") {
+		if(pDiscountPos.marketingAction.text !== "") {
 			actionName = pDiscountPos.marketingAction.text;
 		} else {
 			actionName = "— »ƒ ¿";
 		}
 		var discSumForPrint = "";				
-		if (pDiscountPos.valueType == 0) {
+		if (pDiscountPos.valueType === 0) {
 			var discPercent = print.formatPercent(pDiscountPos.value / dPosition.sum * 100);
 			actionName += " (" + discPercent + "%)";
 			discSumForPrint = print.formatCurrency(invertNegativeValue(pDiscountPos));
