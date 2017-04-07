@@ -419,17 +419,6 @@ function beforeCloseDocument() {
 	if (frontol.currentDocument.type.name === "ÂÎÇÂÐÀÒ") {
 		return;
 	}
-	// var bonusCardIndex = 0;
-	// var dCard = frontol.currentDocument.card;
-	// for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-	// 	if (dCard.value.length === 6) {
-	// 		bonusCardIndex = dCard.index;
-	// 		break;
-	// 	}
-	// }
-	// if (bonusCardIndex === 0) {
-	// 	return;
-	// }
 	addBonus();	
 }
 
