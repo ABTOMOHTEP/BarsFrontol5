@@ -192,9 +192,9 @@ function beforeAddPayment(payment) {
 		var realDisc = skid1;
 		var remainingSumm = realDisc;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-			if (dCard.value.length === 8) {
+			if (isSertificate(dCard)) {
 				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-					if (cCounter.type.code === 2) {
+					if (cCounter.type.code === sertificateCounterTypeCode()) {
 						var sertificateSumm = cCounter.value;
 						var sertificatePaymentSumm = Math.min(sertificateSumm, remainingSumm);
 						remainingSumm -= sertificatePaymentSumm;
@@ -205,17 +205,27 @@ function beforeAddPayment(payment) {
 				}
 			}
 		}
-		frontol.currentDocument.addPayment(101, realDisc);
+		frontol.currentDocument.addPayment(floatNominalSertificatePaymentCode(), realDisc);
 		frontol.actions.cancel();
 	// оплата сертификатами с фиксированным номиналом
 	} else if (payment.type.name === "Сертификат") {
 		var sertificateString =  getSertificateString();
 		var sertNominal = frontol.actions.selectString("Выберите номинал сертификата", sertificateString, sertificateString);
 		if (sertNominal !== null) {
-			frontol.currentDocument.addPayment(5, sertNominal);
+			frontol.currentDocument.addPayment(fixedNominalSertificatePaymentCode(), sertNominal);
 		}
 		frontol.actions.cancel();		
 	}
+}
+
+function floatNominalSertificatePaymentCode() {
+	var sertificatePaymentCode = 101;
+	return sertificatePaymentCode;
+}
+
+function fixedNominalSertificatePaymentCode() {
+	var sertificatePaymentCode = 5;
+	return sertificatePaymentCode;
 }
 
 function getSertificateString() {
@@ -235,10 +245,10 @@ function beforeStornoPayment(payment) {
 	var remainingSummForStorno = payment.sumInPaymentCurrency;
 	var dCard = frontol.currentDocument.card;
 	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-		if (dCard.value.length === 8) {
+		if (isSertificate(dCard)) {
 			var cCounter = dCard.counter;
 			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-				if (cCounter.type.code === 2) {
+				if (cCounter.type.code === sertificateCounterTypeCode()) {
 					cCounter.addValue(remainingSummForStorno);
 					remainingSummForStorno = 0;
 					var cClassifier = dCard.classifier;
@@ -265,7 +275,7 @@ function calculateBonusMacro() {
 	// проверка на введенную бонусную карту
 	var dCard = frontol.currentDocument.card;
 	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-		if (dCard.value.length === 6) {
+		if (isBonusCard(dCard)) {
 			bonusCardFound = true;
 			// проверка принадлежности карты к стоп-листу списаний
 			var cClassifier = dCard.classifier;
@@ -281,9 +291,9 @@ function calculateBonusMacro() {
 				if (cCounter.type.code === 1) {
 					summBonusClient = cCounter.value;
 				}
-				else if (cCounter.type.code === 3) {
+				else if (cCounter.type.code === cardLevelCounterTypeCode()) {
 					var buySumm = Math.floor(cCounter.value);
-					if (buySumm >= 100000) {
+					if (buySumm >= cardLevelTwoLimit()) {
 						bonusCardLevel = 2;
 					}
 				}
