@@ -109,10 +109,6 @@ function discountActive(discountCode) {
 	return bonusDiscountActive;
 }
 
-function railwayDiscountActive() {
-
-}
-
 function bonusDiscountCode() {
 	return 27;
 }
@@ -418,7 +414,11 @@ function calculateBonusMacro() {
 }
 
 function calculateRailwayDiscount() {
-
+	if (discountActive(bonusDiscountCode())) {
+		frontol.actions.showMessage("Запрещено применять скидку по карте РЖД \n"
+		+ "при наличии списания бонусов!");
+		frontol.actions.cancel();	
+	}
 	// todo
 
 }
