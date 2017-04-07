@@ -30,7 +30,7 @@ function beforeAddCard(card) {
 }
 
 function afterAddCard(card) {
-	if (card.value.length !== 6) {
+	if ((card.value.length !== 6) || (card.value.length !== 16)) {
 		return 0;
 	}
 
@@ -388,6 +388,10 @@ function calculateBonusMacro() {
 	}
 
 	frontol.currentDocument.recalculateAllDiscounts();
+}
+
+function calculateRailwayDiscount() {
+
 }
 
 function bonusSkidWare(bonusPosition) {
