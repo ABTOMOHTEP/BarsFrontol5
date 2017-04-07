@@ -142,6 +142,7 @@ function beforeAddPayment(payment) {
 	if (payment.type.name === "ѕодарочна€ карта") {
 		var totalSertificatesRemain = 0;
 		var dCard = frontol.currentDocument.card;
+		var cCounter = dCard.counter;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (dCard.value.length === 8) {
 				var cClassifier = dCard.classifier;
@@ -150,8 +151,7 @@ function beforeAddPayment(payment) {
 						frontol.actions.showMessage("— сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
 						frontol.actions.cancel();
 					}
-				}
-				var cCounter = dCard.counter;				
+				}				
 				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
 					if (cCounter.type.code === 2) {
 						totalSertificatesRemain += cCounter.value;
@@ -170,7 +170,6 @@ function beforeAddPayment(payment) {
 		var remainingSumm = realDisc;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (dCard.value.length === 8) {
-				var cCounter = frontol.currentDocument.card.counter;
 				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
 					if (cCounter.type.code === 2) {
 						var sertificateSumm = cCounter.value;
@@ -292,6 +291,8 @@ function calculateBonusMacro() {
 	var summWares10 = 0;
 	var summWares20 = 0;
 	var dPosition = frontol.currentDocument.position;
+	var pDiscountPos = dPosition.discountPos;
+	var wClassifier = dPosition.ware.classifier;
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
 		// расчет максимальной суммы списани€ дл€ товаров с максимальной скидкой
 		autoDiscActive = false;
@@ -307,7 +308,6 @@ function calculateBonusMacro() {
 		if (dPosition.sum - dPosition.totalSum === 0) {
 			summDokForSkid += dPosition.sum;
 		} else if (dPosition.sum - dPosition.totalSum !== 0) {
-			var pDiscountPos = dPosition.discountPos;
 			for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
 				if (pDiscountPos.marketingAction.code === automaticDiscountCode() // ищем автоматические ненулевые скидки на позицию
 					&& pDiscountPos.sum > 0) {
@@ -319,7 +319,6 @@ function calculateBonusMacro() {
 			}
 		}
 		// рассчет суммы товаров с классификатором "товары—о—кидкой10" и "товары—о—кидкой20"
-		var wClassifier = dPosition.ware.classifier;
 		for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
 			if (wClassifier.code === 3) {
 				if (dPosition.sum - dPosition.totalSum === 0) {
@@ -380,10 +379,9 @@ function calculateBonusMacro() {
 		if (dPosition.storno === 1) {
 			koeffWare = 0;
 		} else {
-			var pDiscountPos = dPosition.discountPos;
 			if (dPosition.sum - dPosition.totalSum !== 0) {
 				for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-					if (pDiscountPos.marketingAction.code === 100000000 // ищем автоматические ненулевые скидки на позицию
+					if (pDiscountPos.marketingAction.code === manualDiscountCode() 
 						&& pDiscountPos.sum > 0) {
 						autoDiscActiveWare = true;
 						koeffWare = 0;
@@ -391,7 +389,6 @@ function calculateBonusMacro() {
 				}
 			}
 			if (!autoDiscActiveWare) {
-				var wClassifier = dPosition.ware.classifier;
 				for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
 					if (wClassifier.code === 3) {  // ищем классификатор с кодом "3" (10 процентов бонусами)
 						koeffWare = 10;
