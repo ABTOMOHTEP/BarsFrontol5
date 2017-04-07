@@ -12,7 +12,7 @@ function printPosition(print) {
 		var pAspect = dPosition.aspect;
 		for (pAspect.index = 1; pAspect.index <= pAspect.count; pAspect.index ++) {
 			if (pAspect.code !== 0 
-				&& pAspect.code !== 1000000000) {
+				&& pAspect.code !== defaultAspectCode()) {
 				print.printStringWordWrap("    Подарочная карта:" + " " + pAspect.text);
 			}
 		}
@@ -129,3 +129,7 @@ function printFooter(print) {
 	}
 }
 
+function defaultAspectCode() {
+	var defaultAspectCode = 1000000000;
+	return defaultAspectCode;
+}

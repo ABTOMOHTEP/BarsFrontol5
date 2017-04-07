@@ -65,15 +65,18 @@ function afterAddCard(card) {
 }
 
 function isRailwayCard(card) {
-	return card.value.length === 16; 
+	var railwayCardLength = 16;
+	return card.value.length === railwayCardLength; 
 }
 
 function isBonusCard(card) {
-	return card.value.length === 6;
+	var bonusCardLength = 6;
+	return card.value.length === bonusCardLength;
 }
 
 function isSertificate(card) {
-	return card.value.length === 8; 
+	var sertificateCardLength = 8;
+	return card.value.length === sertificateCardLength; 
 }
 
 function beforeChangePosition(position) {
