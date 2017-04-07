@@ -82,7 +82,7 @@ function beforeChangePosition(position) {
 
 function beforeAddPosition(position) {
 	if(frontol.currentDocument.type.name === "ÂÎÇÂÐÀÒ") {
-		return 0;
+		return;
 	}
 	checkDiscountsForPositionsLock();
 }
