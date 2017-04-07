@@ -65,15 +65,15 @@ function afterAddCard(card) {
 }
 
 function isRailwayCard(card) {
-	return (card.value.length === 16); 
+	return card.value.length === 16; 
 }
 
 function isBonusCard(card) {
-	return (card.value.length === 6);
+	return card.value.length === 6;
 }
 
 function isSertificate(card) {
-	return (card.value.length === 8); 
+	return card.value.length === 8; 
 }
 
 function beforeChangePosition(position) {
@@ -101,8 +101,8 @@ function discountActive(discountCode) {
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
 		var pDiscountPos = frontol.currentDocument.position.discountPos;
 		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-			if ((pDiscountPos.marketingAction.code === discountCode)
-				&& (pDiscountPos.sum > 0)) { 
+			if (pDiscountPos.marketingAction.code === discountCode
+				&& pDiscountPos.sum > 0) { 
 				bonusDiscountActive = true;
 			}
 		}
@@ -128,9 +128,9 @@ function automaticDiscountCode() {
 
 function beforeAddPayment(payment) {
 	// напоминание кассиру
-	if ((frontol.currentDocument.type.name === "ПРОДАЖА") 
-		&& (frontol.currentDocument.payment.count === 0) 
-		&& (frontol.currentDocument.card.count === 0)) {
+	if (frontol.currentDocument.type.name === "ПРОДАЖА" 
+		&& frontol.currentDocument.payment.count === 0 
+		&& frontol.currentDocument.card.count === 0) {
 		if (frontol.actions.showMessage("Ввести бонусную/подарочную карту в чек?", Button.YesNo + Icon.Question) === DialogResult.Yes) {
 			var WShell = new ActiveXObject("WScript.Shell");
 			WShell.SendKeys ("^({F8})");
@@ -304,9 +304,9 @@ function calculateBonusMacro() {
 		} else if (dPosition.ware.maxDiscount !== 0) {		//обычные продажи
 			summDiscWares += dPosition.sum * dPosition.ware.maxDiscount / 100;
 		}
-		if ((dPosition.sum - dPosition.totalSum) === 0) {
+		if (dPosition.sum - dPosition.totalSum === 0) {
 			summDokForSkid += dPosition.sum;
-		} else if ((dPosition.sum - dPosition.totalSum) !== 0) {
+		} else if (dPosition.sum - dPosition.totalSum !== 0) {
 			var pDiscountPos = dPosition.discountPos;
 			for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
 				if (pDiscountPos.marketingAction.code === automaticDiscountCode() // ищем автоматические ненулевые скидки на позицию
@@ -322,11 +322,11 @@ function calculateBonusMacro() {
 		var wClassifier = dPosition.ware.classifier;
 		for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
 			if (wClassifier.code === 3) {
-				if ((dPosition.sum - dPosition.totalSum) === 0) {
+				if (dPosition.sum - dPosition.totalSum === 0) {
 					summWares10 += dPosition.sum;
 				}
 			} else if (wClassifier.code === 4) {
-				if ((dPosition.sum - dPosition.totalSum) === 0) {
+				if (dPosition.sum - dPosition.totalSum === 0) {
 					if (bonusCardLevel === 2) {
 						summWares20 += dPosition.sum;
 					}
@@ -381,7 +381,7 @@ function calculateBonusMacro() {
 			koeffWare = 0;
 		} else {
 			var pDiscountPos = dPosition.discountPos;
-			if ((dPosition.sum - dPosition.totalSum) !== 0) {
+			if (dPosition.sum - dPosition.totalSum !== 0) {
 				for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
 					if (pDiscountPos.marketingAction.code === 100000000 // ищем автоматические ненулевые скидки на позицию
 						&& pDiscountPos.sum > 0) {
@@ -504,7 +504,7 @@ function afterCloseDocument() {
 			// списание
 			if (totalDisc > 0) {
 				dCard.counter.addValueByTypeCode(1, Math.ceil(-totalDisc));
-				Mess = Mess + "\nСписано бонусных баллов: " +  (Math.ceil(totalDisc));
+				Mess = Mess + "\nСписано бонусных баллов: " +  Math.ceil(totalDisc);
 				// привязываем к карте классификатор стоп-листа списаний
 				dCard.classifier.bind(1);
 			}
@@ -562,8 +562,8 @@ function addBonus() {
 		var noExtraBonus = false;
 		var pDiscountPos = dPosition.discountPos;
 		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-			if ((pDiscountPos.marketingAction.code === 27) // маркетинговая акция "бонусная программа"
-				&& (pDiscountPos.sum > 0)) {
+			if (pDiscountPos.marketingAction.code === bonusDiscountCode() 
+				&& pDiscountPos.sum > 0) {
 				noExtraBonus = true;
 			}
 		}
@@ -581,14 +581,14 @@ function addBonus() {
 				extraBonus50 = true;
 			}
 		}
-		if ((noBonus === false) && (standartProc !== 5000)) {
-			if ((extraBonus50 === true) && (noExtraBonus === false)) {
+		if (noBonus === false && standartProc !== 5000) {
+			if (extraBonus50 === true && noExtraBonus === false) {
 				wareBonus = dPosition.totalSum * 50 / 100;
 			} else {
 				wareBonus = dPosition.totalSum * standartProc / 100;
 			}
 			wareBonus = Math.round(wareBonus * 100) / 100;
-		} else if ((noBonus === false) && (standartProc === 5000)) {
+		} else if (noBonus === false && standartProc === 5000) {
 			wareBonus = frontol.currentDocument.position.totalSum / (frontol.currentDocument.totalSum - summRestrictWares) * 5000;
 		}
 		frontol.currentDocument.userValues.set(varName, wareBonus);
