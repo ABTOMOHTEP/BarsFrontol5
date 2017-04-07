@@ -11,14 +11,14 @@ function printPosition(print) {
 	if (dPosition.aspect.count !== 0 && dPosition.ware.name === "Пополнение баланса подарочной карты") {
 		var pAspect = dPosition.aspect;
 		for (pAspect.index = 1; pAspect.index <= pAspect.count; pAspect.index ++) {
-			if (pAspect.code !== 0 
+			if (pAspect.code !== 0
 				&& pAspect.code !== defaultAspectCode()) {
 				print.printStringWordWrap("    Подарочная карта: " + pAspect.text);
 			}
 		}
 	}
 	print.printLRStringLF(" ЦЕНА", "=" + print.formatCurrency(dPosition.ware.price), " ");
-	
+
 	var pDiscountPos = dPosition.discountPos;
 	for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index++) {
 		if (pDiscountPos.sum === 0) {
@@ -28,12 +28,12 @@ function printPosition(print) {
 			continue;
 		}
 		var actionName = "";
-		if (pDiscountPos.marketingAction.text !== "") {
-			actionName = pDiscountPos.marketingAction.text;
-		} else {
+		if (pDiscountPos.marketingAction.text === "") {
 			actionName = "СКИДКА";
+		} else {
+			actionName = pDiscountPos.marketingAction.text;
 		}
-		var discSumForPrint = "";				
+		var discSumForPrint = "";
 		if (pDiscountPos.valueType === 0) {
 			var discPercent = print.formatPercent(pDiscountPos.value / dPosition.sum * 100);
 			actionName += " (" + discPercent + "%)";
@@ -55,14 +55,14 @@ function invertNegativeValue(pDiscountPos) {
 	} else {
 		newValue = pDiscountPos.value;
 	}
-	return newValue;	
+	return newValue;
 }
 
 function printFooter(print) {
 	var dAspect = frontol.currentDocument.aspect;
 	for (dAspect.index = 1; dAspect.index <= dAspect.count; dAspect.index ++) {
 		if (dAspect.text !== "") {
-			print.printStringWordWrap(dAspect.aspectText + ": " 
+			print.printStringWordWrap(dAspect.aspectText + ": "
 			+ dAspect.text);
 		}
 	}
@@ -82,11 +82,11 @@ function printFooter(print) {
 	var dPayment = frontol.currentDocument.payment;
 	for (dPayment.index = 1; dPayment.index <= dPayment.count; dPayment.index++) {
 		if (dPayment.sumInBaseCurrency > 0) {
-			print.printLRString("  " + dPayment.type.text, "=" 
+			print.printLRString("  " + dPayment.type.text, "="
 				+ print.formatCurrency(dPayment.sumInBaseCurrency), " ");
 		} else {
 			print.printStringWordWrap("СДАЧА");
-			print.printLRString("  " + dPayment.type.text, "=" 
+			print.printLRString("  " + dPayment.type.text, "="
 				+ print.formatCurrency(-dPayment.sumInBaseCurrency), " ");
 		}
 	}
@@ -107,7 +107,7 @@ function printFooter(print) {
 			}
 		}
 	}
-	if (bonusCardInserted === true) { 
+	if (bonusCardInserted === true) {
 		print.printStringWordWrap("Начислено бонусных баллов: " + BonusDelta);
 	} else {
 		print.printStringWordWrap("Могло быть начислено бонусных баллов: " + BonusDelta);

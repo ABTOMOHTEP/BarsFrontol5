@@ -32,7 +32,7 @@ function beforeAddCard(card) {
 				frontol.actions.showMessage("Карта РЖД уже введена!");
 				frontol.actions.cancel();
 			}
-		}	
+		}
 	}
 }
 
@@ -78,7 +78,7 @@ function cardLevelTwoLimit() {
 
 function isRailwayCard(card) {
 	var railwayCardLength = 16;
-	return card.value.length === railwayCardLength; 
+	return card.value.length === railwayCardLength;
 }
 
 function isBonusCard(card) {
@@ -88,7 +88,7 @@ function isBonusCard(card) {
 
 function isSertificate(card) {
 	var sertificateCardLength = 8;
-	return card.value.length === sertificateCardLength; 
+	return card.value.length === sertificateCardLength;
 }
 
 function beforeChangePosition(position) {
@@ -96,7 +96,7 @@ function beforeChangePosition(position) {
 }
 
 function beforeAddPosition(position) {
-	if(frontol.currentDocument.type.name === "ВОЗВРАТ") {
+	if (frontol.currentDocument.type.name === "ВОЗВРАТ") {
 		return;
 	}
 	checkDiscountsForPositionsLock();
@@ -104,7 +104,7 @@ function beforeAddPosition(position) {
 
 function checkDiscountsForPositionsLock() {
 	if (discountActive(bonusDiscountCode()) || discountActive(railwayDiscountCode())) {
-		frontol.actions.showMessage("Запрещено добавлять/изменять позиции \n" 
+		frontol.actions.showMessage("Запрещено добавлять/изменять позиции \n"
 			+ "в чеке со списанием бонусами или картами РЖД!");
 		frontol.actions.cancel();
 	}
@@ -117,7 +117,7 @@ function discountActive(discountCode) {
 		var pDiscountPos = frontol.currentDocument.position.discountPos;
 		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
 			if (pDiscountPos.marketingAction.code === discountCode
-				&& pDiscountPos.sum > 0) { 
+				&& pDiscountPos.sum > 0) {
 				bonusDiscountActive = true;
 			}
 		}
@@ -147,8 +147,8 @@ function automaticDiscountCode() {
 
 function beforeAddPayment(payment) {
 	// напоминание кассиру
-	if (frontol.currentDocument.type.name === "ПРОДАЖА" 
-		&& frontol.currentDocument.payment.count === 0 
+	if (frontol.currentDocument.type.name === "ПРОДАЖА"
+		&& frontol.currentDocument.payment.count === 0
 		&& frontol.currentDocument.card.count === 0) {
 		if (frontol.actions.showMessage("Ввести бонусную/подарочную карту в чек?", Button.YesNo + Icon.Question) === DialogResult.Yes) {
 			var WShell = new ActiveXObject("WScript.Shell");
@@ -170,7 +170,7 @@ function beforeAddPayment(payment) {
 						frontol.actions.showMessage("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
 						frontol.actions.cancel();
 					}
-				}				
+				}
 				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
 					if (cCounter.type.code === sertificateCounterTypeCode()) {
 						totalSertificatesRemain += cCounter.value;
@@ -183,7 +183,7 @@ function beforeAddPayment(payment) {
 			frontol.actions.cancel();
 		}
 
-		// Списываем со всех сертификатов		
+		// Списываем со всех сертификатов
 		var skid1 = Math.min(frontol.currentDocument.totalSum, totalSertificatesRemain);
 		var realDisc = skid1;
 		var remainingSumm = realDisc;
@@ -210,7 +210,7 @@ function beforeAddPayment(payment) {
 		if (sertNominal !== null) {
 			frontol.currentDocument.addPayment(fixedNominalSertificatePaymentCode(), sertNominal);
 		}
-		frontol.actions.cancel();		
+		frontol.actions.cancel();
 	}
 }
 
@@ -225,11 +225,11 @@ function fixedNominalSertificatePaymentCode() {
 }
 
 function getSertificateString() {
-	return "500\n" 
-		+ "1000\n" 
-		+ "1500\n" 
-		+ "2000\n" 
-		+ "3000\n" 
+	return "500\n"
+		+ "1000\n"
+		+ "1500\n"
+		+ "2000\n"
+		+ "3000\n"
 		+ "5000";
 }
 
@@ -237,7 +237,7 @@ function beforeStornoPayment(payment) {
 	// при сторнировании оплаты возвращаем сумму платежа подарочными сертификатами на счетчики
 	if (payment.type.name !== "Подарочная карта") {
 		return;
-	}  
+	}
 	var remainingSummForStorno = payment.sumInPaymentCurrency;
 	var dCard = frontol.currentDocument.card;
 	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
@@ -255,16 +255,16 @@ function beforeStornoPayment(payment) {
 				}
 			}
 		}
-	}		
+	}
 }
 
 function calculateBonusMacro() {
 	if (discountActive(railwayDiscountCode())) {
 		frontol.actions.showMessage("Запрещено списывать бонусы при наличии \n"
 			+ "скидки по карте РЖД!");
-		frontol.actions.cancel();	
+		frontol.actions.cancel();
 	}
-	
+
 	var bonusCardFound = false;
 	var summBonusClient = 0;
 	var bonusCardLevel = 1;
@@ -408,7 +408,7 @@ function calculateBonusMacro() {
 		} else {
 			if (dPosition.sum - dPosition.totalSum !== 0) {
 				for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-					if (pDiscountPos.marketingAction.code === manualDiscountCode() 
+					if (pDiscountPos.marketingAction.code === manualDiscountCode()
 						&& pDiscountPos.sum > 0) {
 						autoDiscActiveWare = true;
 						koeffWare = 0;
@@ -452,7 +452,7 @@ function calculateRailwayDiscount() {
 	if (discountActive(bonusDiscountCode())) {
 		frontol.actions.showMessage("Запрещено применять скидку по карте РЖД \n"
 		+ "при наличии списания бонусов!");
-		frontol.actions.cancel();	
+		frontol.actions.cancel();
 	}
 
 	// todo
@@ -465,15 +465,15 @@ function raylwayDiscountWare(docPosition) {
 	var finalSkid = 0;
 	var dPosition = frontol.currentDocument.position;
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-		if (dPosition.ware.code === docPosition.ware.code  
-		&& dPosition.quantity === docPosition.quantity 
-		&& getAspectString(dPosition) === discountPositionAspectString) {  
+		if (dPosition.ware.code === docPosition.ware.code
+		&& dPosition.quantity === docPosition.quantity
+		&& getAspectString(dPosition) === discountPositionAspectString) {
 			var varName = "railwayDiscount" + dPosition.index;
 			finalSkid = frontol.currentDocument.userValues.get(varName);
 			break;
 		}
 	}
-	return finalSkid;	
+	return finalSkid;
 }
 
 function bonusSkidWare(bonusPosition) {
@@ -481,9 +481,9 @@ function bonusSkidWare(bonusPosition) {
 	var finalSkid = 0;
 	var dPosition = frontol.currentDocument.position;
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-		if (dPosition.ware.code === bonusPosition.ware.code  
-		&& dPosition.quantity === bonusPosition.quantity 
-		&& getAspectString(dPosition) === bonusPositionAspectString) {  
+		if (dPosition.ware.code === bonusPosition.ware.code
+		&& dPosition.quantity === bonusPosition.quantity
+		&& getAspectString(dPosition) === bonusPositionAspectString) {
 			var varName = "skidka" + dPosition.index;
 			finalSkid = frontol.currentDocument.userValues.get(varName);
 			break;
@@ -498,14 +498,14 @@ function getAspectString(position) {
 	for (pAspect.index = 1; pAspect.index <= pAspect.count;	pAspect.index ++) {
 		aspectString += pAspect.aspectText;
 	}
-	return aspectString;		
+	return aspectString;
 }
 
 function beforeCloseDocument() {
 	if (frontol.currentDocument.type.name === "ВОЗВРАТ") {
 		return;
 	}
-	addBonus();	
+	addBonus();
 }
 
 function afterCloseDocument() {
@@ -586,7 +586,7 @@ function addBonus() {
 		var noExtraBonus = false;
 		var pDiscountPos = dPosition.discountPos;
 		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-			if (pDiscountPos.marketingAction.code === bonusDiscountCode() 
+			if (pDiscountPos.marketingAction.code === bonusDiscountCode()
 				&& pDiscountPos.sum > 0) {
 				noExtraBonus = true;
 			}
@@ -620,23 +620,23 @@ function addBonus() {
 	if (standartProc === 5000) {
 		bonusTotal = 5000;
 	}
-	frontol.currentDocument.userValues.set("nachislenie", Math.ceil(bonusTotal));	
+	frontol.currentDocument.userValues.set("nachislenie", Math.ceil(bonusTotal));
 }
 
 function maxBonusPercent(summDokForSkid) {
 	// максимальный процент для списания
 	var standartProc = 0;
-	if (summDokForSkid >= 100001) {   
+	if (summDokForSkid >= 100001) {
 		standartProc = 1;
-	} else if (summDokForSkid >= 50001) { 
+	} else if (summDokForSkid >= 50001) {
 		standartProc = 2;
-	} else if (summDokForSkid >= 20001) {   
+	} else if (summDokForSkid >= 20001) {
 		standartProc = 3;
-	} else if (summDokForSkid >= 5001) {   
+	} else if (summDokForSkid >= 5001) {
 		standartProc = 4;
-	} else if (summDokForSkid >= 1001) { 
+	} else if (summDokForSkid >= 1001) {
 		standartProc = 5;
-	} else if (summDokForSkid >= 10) { 
+	} else if (summDokForSkid >= 10) {
 		standartProc = 10;
 	}
 	return standartProc;
