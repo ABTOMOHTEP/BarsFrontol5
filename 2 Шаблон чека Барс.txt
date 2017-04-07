@@ -13,7 +13,7 @@ function printPosition(print) {
 		for (pAspect.index = 1; pAspect.index <= pAspect.count; pAspect.index ++) {
 			if (pAspect.code !== 0 
 				&& pAspect.code !== defaultAspectCode()) {
-				print.printStringWordWrap("    Ïîäàðî÷íàÿ êàðòà:" + " " + pAspect.text);
+				print.printStringWordWrap("    Ïîäàðî÷íàÿ êàðòà: " + pAspect.text);
 			}
 		}
 	}
@@ -44,7 +44,7 @@ function printPosition(print) {
 		}
 		print.printLRStringLF(" " + actionName, "=" + discSumForPrint, " ");
 	}
-	print.printLRString(" " + "ÑÓÌÌÀ ÑÎ ÑÊÈÄÊÀÌÈ", "=" + print.formatCurrency(dPosition.totalSum), " ");
+	print.printLRString(" ÑÓÌÌÀ ÑÎ ÑÊÈÄÊÀÌÈ", "=" + print.formatCurrency(dPosition.totalSum), " ");
 	print.printLRStringLF("-","-","-");
 }
 

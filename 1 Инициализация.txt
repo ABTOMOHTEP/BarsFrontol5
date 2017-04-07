@@ -57,8 +57,8 @@ function afterAddCard(card) {
 			}
 		}
 		frontol.actions.showMessage("На карте накоплено баллов: " + bonusSumm
-			+ "\n" + "Сумма покупок по карте: " + buySumm
-			+ "\n" + "Уровень карты: " + cardLevel);
+			+ "\n Сумма покупок по карте: " + buySumm
+			+ "\n Уровень карты: " + cardLevel);
 	}
 	else if (isRailwayCard(card)) {
 		calculateRailwayDiscount();
@@ -229,11 +229,11 @@ function fixedNominalSertificatePaymentCode() {
 }
 
 function getSertificateString() {
-	return "500" + "\n" 
-		+ "1000" + "\n" 
-		+ "1500" + "\n" 
-		+ "2000" + "\n" 
-		+ "3000" + "\n" 
+	return "500\n" 
+		+ "1000\n" 
+		+ "1500\n" 
+		+ "2000\n" 
+		+ "3000\n" 
 		+ "5000";
 }
 
