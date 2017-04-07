@@ -117,6 +117,14 @@ function railwayDiscountCode() {
 	return 29;
 }
 
+function manualDiscountCode() {
+	return 28;
+}
+
+function automaticDiscountCode() {
+	return 100000000;
+}
+
 function beforeAddPayment(payment) {
 	// напоминание кассиру
 	if ((frontol.currentDocument.type.name === "ѕ–ќƒј∆ј") 
@@ -264,23 +272,16 @@ function calculateBonusMacro() {
 		frontol.actions.cancel();
 	}
 
-	// проверка скидок на документ
-	if (frontol.currentDocument.discountDoc.count > 0) {
+	// проверка наличи€ скидок на документ
+	if (documentDiscountsAreActive()) {
 		frontol.actions.showMessage("«апрещено списывать бонусы при наличии другой скидки на документ!");
 		frontol.actions.cancel();
 	}
 
 	// проверка ручных скидки на товары
-	var dPosition = frontol.currentDocument.position;
-	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-		var pDiscountPos = dPosition.discountPos;
-		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-			if (pDiscountPos.marketingAction.code === 28 // маркетингова€ акци€ "ручна€ скидка"
-				&& pDiscountPos.sum > 0) {
-				frontol.actions.showMessage("«апрещено списывать бонусы при наличии ручной скидки!");
-				frontol.actions.cancel();
-			}
-		}
+	if (discountActive(manualDiscountCode())) {
+		frontol.actions.showMessage("«апрещено списывать бонусы при наличии ручной скидки!");
+		frontol.actions.cancel();
 	}
 
 	var summDiscWares = 0;   // сумма, разрешенна€ дл€ списани€
@@ -289,6 +290,7 @@ function calculateBonusMacro() {
 	var autoDiscActive;
 	var summWares10 = 0;
 	var summWares20 = 0;
+	var dPosition = frontol.currentDocument.position;
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
 		// расчет максимальной суммы списани€ дл€ товаров с максимальной скидкой
 		autoDiscActive = false;
@@ -306,7 +308,7 @@ function calculateBonusMacro() {
 		} else if ((dPosition.sum - dPosition.totalSum) !== 0) {
 			var pDiscountPos = dPosition.discountPos;
 			for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-				if (pDiscountPos.marketingAction.code === 100000000 // ищем автоматические ненулевые скидки на позицию
+				if (pDiscountPos.marketingAction.code === automaticDiscountCode() // ищем автоматические ненулевые скидки на позицию
 					&& pDiscountPos.sum > 0) {
 					autoDiscActive = true;
 				}
@@ -371,7 +373,7 @@ function calculateBonusMacro() {
 
 	// распределение скидок по позици€м
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-		//**** вычисл€ем процент дл€ текущего товара
+		// вычисл€ем процент дл€ текущего товара
 		var koeffWare = standartProc;
 		var autoDiscActiveWare = false;
 		if (dPosition.storno === 1) {
@@ -413,12 +415,21 @@ function calculateBonusMacro() {
 	frontol.currentDocument.recalculateAllDiscounts();
 }
 
+function documentDiscountsAreActive() {
+	var discActive = false;
+	if (frontol.currentDocument.discountDoc.count > 0) {
+		discActive = true;
+	}
+	return discActive;
+}
+
 function calculateRailwayDiscount() {
 	if (discountActive(bonusDiscountCode())) {
 		frontol.actions.showMessage("«апрещено примен€ть скидку по карте –∆ƒ \n"
 		+ "при наличии списани€ бонусов!");
 		frontol.actions.cancel();	
 	}
+
 	// todo
 
 	frontol.currentDocument.recalculateAllDiscounts();
