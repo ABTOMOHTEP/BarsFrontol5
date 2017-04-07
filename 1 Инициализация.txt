@@ -1,3 +1,4 @@
+/* global frontol, Icon, Button, DialogResult, ActiveXObject */
 function init() {
 	frontol.addEventListener("addCard", "beforeAddCard", true);
 	frontol.addEventListener("addCard", "afterAddCard", false);
@@ -436,12 +437,12 @@ function calculateRailwayDiscount() {
 }
 
 function raylwayDiscountWare(docPosition) {
-	var discountPositionAspectString = getAspectString(bonusPosition);
+	var discountPositionAspectString = getAspectString(docPosition);
 	var finalSkid = 0;
 	var dPosition = frontol.currentDocument.position;
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-		if (dPosition.ware.code === bonusPosition.ware.code  
-		&& dPosition.quantity === bonusPosition.quantity 
+		if (dPosition.ware.code === docPosition.ware.code  
+		&& dPosition.quantity === docPosition.quantity 
 		&& getAspectString(dPosition) === discountPositionAspectString) {  
 			var varName = "railwayDiscount" + dPosition.index;
 			finalSkid =  frontol.currentDocument.userValues.get(varName);
