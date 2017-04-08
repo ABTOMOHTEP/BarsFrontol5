@@ -130,6 +130,23 @@ function automaticDiscountCode() {
 	return automaticDiscountCode;
 }
 
+function sertificateInformation(card) {
+	var sertificateInformation = {
+		"summRemain": 0,
+		"isInStopList": false
+	};
+	var cCounter = card.counter;
+	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+		if (cCounter.type.code === sertificateCounterTypeCode()) {
+			sertificateInformation.summRemain = cCounter.value;
+		}
+	}
+	if (cardIsInStopList(card)) {
+		sertificateInformation.isInStopList = true;
+	}
+	return sertificateInformation;
+}
+
 function beforeAddPayment(payment) {
 	// напоминание кассиру
 	if (frontol.currentDocument.type.name === "ПРОДАЖА"
@@ -149,15 +166,12 @@ function beforeAddPayment(payment) {
 		var cCounter = dCard.counter;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isSertificate(dCard)) {
-				if (cardIsInStopList(dCard)) {
+				var sertificateInformation = sertificateInformation(dCard);
+				if (sertificateInformation.isInStopList) {
 					frontol.actions.showMessage("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
 					frontol.actions.cancel();
 				}
-				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-					if (cCounter.type.code === sertificateCounterTypeCode()) {
-						totalSertificatesRemain += cCounter.value;
-					}
-				}
+				totalSertificatesRemain += sertificateInformation.summRemain;
 			}
 		}
 		if (totalSertificatesRemain === 0) {
@@ -215,6 +229,13 @@ function getSertificateString() {
 		+ "5000";
 }
 
+function removeFromStopList(card) {
+	var cClassifier = card.classifier;
+	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
+		cClassifier.unBind();
+	}
+}
+
 function beforeStornoPayment(payment) {
 	// при сторнировании оплаты возвращаем сумму платежа подарочными сертификатами на счетчики
 	if (payment.type.name !== "Подарочная карта") {
@@ -229,10 +250,7 @@ function beforeStornoPayment(payment) {
 				if (cCounter.type.code === sertificateCounterTypeCode()) {
 					cCounter.addValue(remainingSummForStorno);
 					remainingSummForStorno = 0;
-					var cClassifier = dCard.classifier;
-					for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
-						cClassifier.unBind();
-					}
+					removeFromStopList(dCard);
 					break;
 				}
 			}
