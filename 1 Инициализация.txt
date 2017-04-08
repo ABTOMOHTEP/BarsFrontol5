@@ -281,7 +281,6 @@ function calculateBonusMacro() {
 			+ "скидки по карте РЖД!");
 		frontol.actions.cancel();
 	}
-
 	var bonusCardInformation = "";
 	var dCard = frontol.currentDocument.card;
 	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
