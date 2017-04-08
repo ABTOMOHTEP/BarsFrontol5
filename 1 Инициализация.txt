@@ -9,27 +9,27 @@ function init() {
 	frontol.addEventListener("closeDocument", "afterCloseDocument", false);
 }
 
+function showMessageAndCancel(text) {
+	frontol.actions.showMessage(text);
+	frontol.actions.cancel();
+}
+
 function beforeAddCard(card) {
 	var dCard = frontol.currentDocument.card;
 	if (isBonusCard(card)) {
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isBonusCard(dCard)) {
-				frontol.actions.showMessage("Бонусная карта уже введена!");
-				frontol.actions.cancel();
+				showMessageAndCancel("Бонусная карта уже введена!");
 			}
 		}
 	} else if (isSertificate(card)) {
-		for (card.classifier.index = 1; card.classifier.index <= card.classifier.count; card.classifier.index ++) {
-			if (card.classifier.code === 1) {
-				frontol.actions.showMessage("С сертификата уже списывались средства!");
-				frontol.actions.cancel();
-			}
+		if (cardIsInStopList(card)) {
+			showMessageAndCancel("С сертификата уже списывались средства!");
 		}
 	} else if (isRailwayCard(card)) {
-		for (card.classifier.index = 1; card.classifier.index <= card.classifier.count; card.classifier.index ++) {
+		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isRailwayCard(dCard)) {
-				frontol.actions.showMessage("Карта РЖД уже введена!");
-				frontol.actions.cancel();
+				showMessageAndCancel("Карта РЖД уже введена!");
 			}
 		}
 	}
@@ -89,9 +89,8 @@ function beforeAddPosition(position) {
 
 function checkDiscountsForPositionsLock() {
 	if (discountActive(bonusDiscountCode()) || discountActive(railwayDiscountCode())) {
-		frontol.actions.showMessage("Запрещено добавлять/изменять позиции \n"
+		showMessageAndCancel("Запрещено добавлять/изменять позиции \n"
 			+ "в чеке со списанием бонусами или картами РЖД!");
-		frontol.actions.cancel();
 	}
 }
 
@@ -161,22 +160,20 @@ function beforeAddPayment(payment) {
 
 	// оплата подарочными сертификатами
 	if (payment.type.name === "Подарочная карта") {
-		var sertificateInformation = "";
+		var sertInformation = "";
 		var totalSertificatesRemain = 0;
 		var dCard = frontol.currentDocument.card;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isSertificate(dCard)) {
-				sertificateInformation = sertificateInformation(dCard);
-				if (sertificateInformation.isInStopList) {
-					frontol.actions.showMessage("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
-					frontol.actions.cancel();
+				sertInformation = sertificateInformation(dCard);
+				if (sertInformation.isInStopList) {
+					showMessageAndCancel("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
 				}
-				totalSertificatesRemain += sertificateInformation.summRemain;
+				totalSertificatesRemain += sertInformation.summRemain;
 			}
 		}
 		if (totalSertificatesRemain === 0) {
-			frontol.actions.showMessage("Сертификаты не введены или полностью погашены!");
-			frontol.actions.cancel();
+			showMessageAndCancel("Сертификаты не введены или полностью погашены!");
 		}
 
 		// Списываем со всех сертификатов
@@ -185,8 +182,8 @@ function beforeAddPayment(payment) {
 		var remainingSumm = realDisc;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isSertificate(dCard)) {
-				sertificateInformation = sertificateInformation(dCard);
-				var sertificatePaymentSumm = Math.min(sertificateInformation.summRemain, remainingSumm);
+				sertInformation = sertificateInformation(dCard);
+				var sertificatePaymentSumm = Math.min(sertInformation.summRemain, remainingSumm);
 				remainingSumm -= sertificatePaymentSumm;
 				addSummToCard(dCard, sertificateCounterTypeCode(), -sertificatePaymentSumm);
 				addToStopList(dCard);
@@ -304,9 +301,8 @@ function bonusCardInformation(card) {
 
 function calculateBonusMacro() {
 	if (discountActive(railwayDiscountCode())) {
-		frontol.actions.showMessage("Запрещено списывать бонусы при наличии \n"
+		showMessageAndCancel("Запрещено списывать бонусы при наличии \n"
 			+ "скидки по карте РЖД!");
-		frontol.actions.cancel();
 	}
 	var bonusCardInformation = "";
 	var dCard = frontol.currentDocument.card;
@@ -317,20 +313,16 @@ function calculateBonusMacro() {
 		}
 	}
 	if (bonusCardInformation === "") {
-		frontol.actions.showMessage("Бонусная карта не введена!");
-		frontol.actions.cancel();
+		showMessageAndCancel("Бонусная карта не введена!");
 	}
 	if (bonusCardInformation.isInStopList) {
-		frontol.actions.showMessage("С данной карты сегодня уже списывались бонусы!");
-		frontol.actions.cancel();
+		showMessageAndCancel("С данной карты сегодня уже списывались бонусы!");
 	}
 	if (documentDiscountsAreActive()) {
-		frontol.actions.showMessage("Запрещено списывать бонусы при наличии другой скидки на документ!");
-		frontol.actions.cancel();
+		showMessageAndCancel("Запрещено списывать бонусы при наличии другой скидки на документ!");
 	}
 	if (discountActive(manualDiscountCode())) {
-		frontol.actions.showMessage("Запрещено списывать бонусы при наличии ручной скидки!");
-		frontol.actions.cancel();
+		showMessageAndCancel("Запрещено списывать бонусы при наличии ручной скидки!");
 	}
 
 	var summDiscWares = 0;   // сумма, разрешенная для списания
@@ -407,15 +399,14 @@ function calculateBonusMacro() {
 		}
 	} else {
 		maxBonusDiscForClient = 0;
-		frontol.actions.showMessage("Нулевой баланс карты или карта не введена!");
+		showMessageAndCancel("Нулевой баланс карты или карта не введена!");
 	}
 
 	// ввод суммы списания
 	var stringMessage = "Введите значение скидки (максимум: " + maxBonusDiscForClient + " баллов)";
 	var realDisc = frontol.actions.inputString(stringMessage, maxBonusDiscForClient, 10);
 	if (realDisc === null || realDisc === "" || realDisc > maxBonusDiscForClient || realDisc === 0) {
-		frontol.actions.showMessage("Введено неверное значение!", Icon.Exclamation);
-		frontol.actions.cancel();
+		showMessageAndCancel("Введено неверное значение!", Icon.Exclamation);
 	}
 	frontol.currentDocument.userValues.set("spisanie", realDisc);
 
@@ -471,9 +462,8 @@ function documentDiscountsAreActive() {
 
 function calculateRailwayDiscount() {
 	if (discountActive(bonusDiscountCode())) {
-		frontol.actions.showMessage("Запрещено применять скидку по карте РЖД \n"
+		showMessageAndCancel("Запрещено применять скидку по карте РЖД \n"
 		+ "при наличии списания бонусов!");
-		frontol.actions.cancel();
 	}
 
 	// todo
