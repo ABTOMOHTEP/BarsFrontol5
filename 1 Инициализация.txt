@@ -161,12 +161,12 @@ function beforeAddPayment(payment) {
 
 	// оплата подарочными сертификатами
 	if (payment.type.name === "Подарочная карта") {
+		var sertificateInformation = "";
 		var totalSertificatesRemain = 0;
 		var dCard = frontol.currentDocument.card;
-		var cCounter = dCard.counter;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isSertificate(dCard)) {
-				var sertificateInformation = sertificateInformation(dCard);
+				sertificateInformation = sertificateInformation(dCard);
 				if (sertificateInformation.isInStopList) {
 					frontol.actions.showMessage("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
 					frontol.actions.cancel();
@@ -185,16 +185,11 @@ function beforeAddPayment(payment) {
 		var remainingSumm = realDisc;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isSertificate(dCard)) {
-				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-					if (cCounter.type.code === sertificateCounterTypeCode()) {
-						var sertificateSumm = cCounter.value;
-						var sertificatePaymentSumm = Math.min(sertificateSumm, remainingSumm);
-						remainingSumm -= sertificatePaymentSumm;
-						cCounter.addValue(-sertificatePaymentSumm);
-						dCard.classifier.bind(1);
-						break;
-					}
-				}
+				sertificateInformation = sertificateInformation(dCard);
+				var sertificatePaymentSumm = Math.min(sertificateInformation.summRemain, remainingSumm);
+				remainingSumm -= sertificatePaymentSumm;
+				addSummToCard(dCard, sertificateCounterTypeCode(), -sertificatePaymentSumm);
+				addToStopList(dCard);
 			}
 		}
 		frontol.currentDocument.addPayment(floatNominalSertificatePaymentCode(), realDisc);
@@ -207,6 +202,16 @@ function beforeAddPayment(payment) {
 			frontol.currentDocument.addPayment(fixedNominalSertificatePaymentCode(), sertNominal);
 		}
 		frontol.actions.cancel();
+	}
+}
+
+function addSummToCard(card, counterTypeCode, summ) {
+	var cCounter = card.counter;
+	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+		if (cCounter.type.code === counterTypeCode) {
+			cCounter.addValue(summ);
+			break;
+		}
 	}
 }
 
@@ -234,6 +239,10 @@ function removeFromStopList(card) {
 	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
 		cClassifier.unBind();
 	}
+}
+
+function addToStopList(card) {
+	card.classifier.bind(1);
 }
 
 function beforeStornoPayment(payment) {
