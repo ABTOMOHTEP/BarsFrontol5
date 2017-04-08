@@ -166,9 +166,6 @@ function beforeAddPayment(payment) {
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isSertificate(dCard)) {
 				sertInformation = sertificateInformation(dCard);
-				if (sertInformation.isInStopList) {
-					showMessageAndCancel("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
-				}
 				totalSertificatesRemain += sertInformation.summRemain;
 			}
 		}
