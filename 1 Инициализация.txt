@@ -37,27 +37,10 @@ function beforeAddCard(card) {
 
 function afterAddCard(card) {
 	if (isBonusCard(card)) {
-		var bonusSumm = 0;
-		var buySumm = 0;
-		var cardLevel = 1;
-		// var cardLevelTwo = 2;
-		// var сCounter = card.counter;
 		var cardInformation = bonusCardInformation(card);
-		bonusSumm = cardInformation.summBonusClient;
-		cardLevel = cardInformation.bonusCardLevel;
-		// for (сCounter.index = 1; сCounter.index <= сCounter.count; сCounter.index ++) {
-		// 	if (сCounter.type.code === 1) {
-		// 		bonusSumm = Math.floor(сCounter.value);
-		// 	} else if (сCounter.type.code === cardLevelCounterTypeCode()) {
-		// 		buySumm = Math.floor(сCounter.value);
-		// 		if (buySumm >= cardLevelTwoLimit()) {
-		// 			cardLevel = cardLevelTwo;
-		// 		}
-		// 	}
-		// }
-		frontol.actions.showMessage("На карте накоплено баллов: " + bonusSumm
-			+ "\n Сумма покупок по карте: " + buySumm
-			+ "\n Уровень карты: " + cardLevel);
+		frontol.actions.showMessage("На карте накоплено баллов: " + cardInformation.summBonusClient
+			+ "\n Сумма покупок по карте: " + cardInformation.buySumm
+			+ "\n Уровень карты: " + cardInformation.bonusCardLevel);
 	} else if (isRailwayCard(card)) {
 		calculateRailwayDiscount();
 	}
@@ -166,12 +149,9 @@ function beforeAddPayment(payment) {
 		var cCounter = dCard.counter;
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isSertificate(dCard)) {
-				var cClassifier = dCard.classifier;
-				for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
-					if (cClassifier.code === 1) {
-						frontol.actions.showMessage("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
-						frontol.actions.cancel();
-					}
+				if (cardIsInStopList(dCard)) {
+					frontol.actions.showMessage("С сертификата " + frontol.currentDocument.card.value + " уже списывались средства!");
+					frontol.actions.cancel();
 				}
 				for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
 					if (cCounter.type.code === sertificateCounterTypeCode()) {
@@ -272,21 +252,25 @@ function cardIsInStopList(card) {
 }
 
 function bonusCardInformation(card) {
-	// расчет накоплений и уровня карты клиента
 	var cardInformation = {
 		"summBonusClient": 0,
-		"bonusCardLevel": 1
+		"bonusCardLevel": 1,
+		"buySumm": 0,
+		"isInStopList": false
 	};
 	var cCounter = card.counter;
 	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
 		if (cCounter.type.code === 1) {
 			cardInformation.summBonusClient = cCounter.value;
 		} else if (cCounter.type.code === cardLevelCounterTypeCode()) {
-			var buySumm = Math.floor(cCounter.value);
-			if (buySumm >= cardLevelTwoLimit()) {
+			cardInformation.buySumm = Math.floor(cCounter.value);
+			if (cardInformation.buySumm >= cardLevelTwoLimit()) {
 				cardInformation.bonusCardLevel = 2;
 			}
 		}
+	}
+	if (cardIsInStopList(card)) {
+		cardInformation.isInStopList = true;
 	}
 	return cardInformation;
 }
@@ -298,47 +282,26 @@ function calculateBonusMacro() {
 		frontol.actions.cancel();
 	}
 
-	var bonusCardFound = false;
-	var summBonusClient = 0;
-	var bonusCardLevel = 1;
-	// проверка на введенную бонусную карту
+	var bonusCardInformation = "";
 	var dCard = frontol.currentDocument.card;
 	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 		if (isBonusCard(dCard)) {
-			bonusCardFound = true;
-			if (cardIsInStopList(dCard)) {
-				frontol.actions.showMessage("С данной карты сегодня уже списывались бонусы!");
-				frontol.actions.cancel();
-			}
-			var cardInformation = bonusCardInformation(dCard);
-			summBonusClient = cardInformation.summBonusClient;
-			bonusCardLevel = cardInformation.bonusCardLevel;
-			// // расчет накоплений и уровня карты клиента
-			// var cCounter = dCard.counter;
-			// for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-			// 	if (cCounter.type.code === 1) {
-			// 		summBonusClient = cCounter.value;
-			// 	} else if (cCounter.type.code === cardLevelCounterTypeCode()) {
-			// 		var buySumm = Math.floor(cCounter.value);
-			// 		if (buySumm >= cardLevelTwoLimit()) {
-			// 			bonusCardLevel = 2;
-			// 		}
-			// 	}
-			// }
+			bonusCardInformation = bonusCardInformation(dCard);
 			break;
 		}
 	}
-	if (!bonusCardFound) {
+	if (bonusCardInformation === "") {
+		frontol.actions.showMessage("Бонусная карта не введена!");
 		frontol.actions.cancel();
 	}
-
-	// проверка наличия скидок на документ
+	if (bonusCardInformation.isInStopList) {
+		frontol.actions.showMessage("С данной карты сегодня уже списывались бонусы!");
+		frontol.actions.cancel();
+	}
 	if (documentDiscountsAreActive()) {
 		frontol.actions.showMessage("Запрещено списывать бонусы при наличии другой скидки на документ!");
 		frontol.actions.cancel();
 	}
-
-	// проверка ручных скидки на товары
 	if (discountActive(manualDiscountCode())) {
 		frontol.actions.showMessage("Запрещено списывать бонусы при наличии ручной скидки!");
 		frontol.actions.cancel();
@@ -386,7 +349,7 @@ function calculateBonusMacro() {
 				}
 			} else if (wClassifier.code === 4) {
 				if (dPosition.sum - dPosition.totalSum === 0) {
-					if (bonusCardLevel === 2) {
+					if (bonusCardInformation.bonusCardLevel === 2) {
 						summWares20 += dPosition.sum;
 					} else {
 						summWares10 += dPosition.sum;
@@ -410,11 +373,11 @@ function calculateBonusMacro() {
 
 	// расчет суммы скидки от суммы чека (с учетом накоплений клиента)
 	var maxBonusDiscForClient = 0;
-	if (summBonusClient > 0) {
+	if (bonusCardInformation.summBonusClient > 0) {
 		if (summDokForSkid < 10) {
 			maxBonusDiscForClient = 0;
 		} else {
-			maxBonusDiscForClient = Math.min(Math.floor(summBonusClient), maxBonusDiscForDocument);
+			maxBonusDiscForClient = Math.min(Math.floor(bonusCardInformation.summBonusClient), maxBonusDiscForDocument);
 		}
 	} else {
 		maxBonusDiscForClient = 0;
@@ -452,7 +415,7 @@ function calculateBonusMacro() {
 					if (wClassifier.code === 3) {  // ищем классификатор с кодом "3" (10 процентов бонусами)
 						koeffWare = 10;
 					} else if (wClassifier.code === 4) {  // ищем классификатор с кодом "4" (20 процентов бонусами)
-						if (bonusCardLevel === 2) {
+						if (bonusCardInformation.bonusCardLevel === 2) {
 							koeffWare = 20;
 						} else {
 							koeffWare = 10;
