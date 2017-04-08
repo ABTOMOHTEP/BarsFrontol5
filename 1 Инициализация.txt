@@ -40,18 +40,21 @@ function afterAddCard(card) {
 		var bonusSumm = 0;
 		var buySumm = 0;
 		var cardLevel = 1;
-		var cardLevelTwo = 2;
-		var сCounter = card.counter;
-		for (сCounter.index = 1; сCounter.index <= сCounter.count; сCounter.index ++) {
-			if (сCounter.type.code === 1) {
-				bonusSumm = Math.floor(сCounter.value);
-			} else if (сCounter.type.code === cardLevelCounterTypeCode()) {
-				buySumm = Math.floor(сCounter.value);
-				if (buySumm >= cardLevelTwoLimit()) {
-					cardLevel = cardLevelTwo;
-				}
-			}
-		}
+		// var cardLevelTwo = 2;
+		// var сCounter = card.counter;
+		var cardInformation = bonusCardInformation(dCard);
+		bonusSumm = cardInformation.summBonusClient;
+		cardLevel = cardInformation.bonusCardLevel;
+		// for (сCounter.index = 1; сCounter.index <= сCounter.count; сCounter.index ++) {
+		// 	if (сCounter.type.code === 1) {
+		// 		bonusSumm = Math.floor(сCounter.value);
+		// 	} else if (сCounter.type.code === cardLevelCounterTypeCode()) {
+		// 		buySumm = Math.floor(сCounter.value);
+		// 		if (buySumm >= cardLevelTwoLimit()) {
+		// 			cardLevel = cardLevelTwo;
+		// 		}
+		// 	}
+		// }
 		frontol.actions.showMessage("На карте накоплено баллов: " + bonusSumm
 			+ "\n Сумма покупок по карте: " + buySumm
 			+ "\n Уровень карты: " + cardLevel);
@@ -257,6 +260,37 @@ function beforeStornoPayment(payment) {
 	}
 }
 
+function cardIsInStopList(card) {
+	var isInStopList = false;
+	var cClassifier = card.classifier;
+	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
+		if (cClassifier.code === 1) {
+			isInStopList = true;
+		}
+	}
+	return isInStopList;
+}
+
+function bonusCardInformation(card) {
+	// расчет накоплений и уровня карты клиента
+	var cardInformation = {
+		"summBonusClient": 0,
+		"bonusCardLevel": 1
+	};
+	var cCounter = card.counter;
+	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+		if (cCounter.type.code === 1) {
+			cardInformation.summBonusClient = cCounter.value;
+		} else if (cCounter.type.code === cardLevelCounterTypeCode()) {
+			var buySumm = Math.floor(cCounter.value);
+			if (buySumm >= cardLevelTwoLimit()) {
+				cardInformation.bonusCardLevel = 2;
+			}
+		}
+	}
+	return cardInformation;
+}
+
 function calculateBonusMacro() {
 	if (discountActive(railwayDiscountCode())) {
 		frontol.actions.showMessage("Запрещено списывать бонусы при наличии \n"
@@ -272,26 +306,25 @@ function calculateBonusMacro() {
 	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 		if (isBonusCard(dCard)) {
 			bonusCardFound = true;
-			// проверка принадлежности карты к стоп-листу списаний
-			var cClassifier = dCard.classifier;
-			for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
-				if (cClassifier.code === 1) {
-					frontol.actions.showMessage("С данной карты сегодня уже списывались бонусы!");
-					frontol.actions.cancel();
-				}
+			if (cardIsInStopList(dCard)) {
+				frontol.actions.showMessage("С данной карты сегодня уже списывались бонусы!");
+				frontol.actions.cancel();
 			}
-			// расчет накоплений и уровня карты клиента
-			var cCounter = dCard.counter;
-			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-				if (cCounter.type.code === 1) {
-					summBonusClient = cCounter.value;
-				} else if (cCounter.type.code === cardLevelCounterTypeCode()) {
-					var buySumm = Math.floor(cCounter.value);
-					if (buySumm >= cardLevelTwoLimit()) {
-						bonusCardLevel = 2;
-					}
-				}
-			}
+			var cardInformation = bonusCardInformation(dCard);
+			summBonusClient = cardInformation.summBonusClient;
+			bonusCardLevel = cardInformation.bonusCardLevel;
+			// // расчет накоплений и уровня карты клиента
+			// var cCounter = dCard.counter;
+			// for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+			// 	if (cCounter.type.code === 1) {
+			// 		summBonusClient = cCounter.value;
+			// 	} else if (cCounter.type.code === cardLevelCounterTypeCode()) {
+			// 		var buySumm = Math.floor(cCounter.value);
+			// 		if (buySumm >= cardLevelTwoLimit()) {
+			// 			bonusCardLevel = 2;
+			// 		}
+			// 	}
+			// }
 			break;
 		}
 	}
