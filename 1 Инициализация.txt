@@ -42,7 +42,7 @@ function afterAddCard(card) {
 		var cardLevel = 1;
 		// var cardLevelTwo = 2;
 		// var ÒCounter = card.counter;
-		var cardInformation = bonusCardInformation(dCard);
+		var cardInformation = bonusCardInformation(card);
 		bonusSumm = cardInformation.summBonusClient;
 		cardLevel = cardInformation.bonusCardLevel;
 		// for (ÒCounter.index = 1; ÒCounter.index <= ÒCounter.count; ÒCounter.index ++) {
