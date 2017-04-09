@@ -175,21 +175,6 @@ function showMessageAndCancel(text) {
 	frontol.actions.cancel();
 }
 
-function cardLevelCounterTypeCode() {
-	var cardLevelCounterTypeCode = 3;
-	return cardLevelCounterTypeCode;
-}
-
-function sertificateCounterTypeCode() {
-	var sertificateCounterTypeCode = 2;
-	return sertificateCounterTypeCode;
-}
-
-function cardLevelTwoLimit() {
-	var cardLevelTwoLimit = 100000;
-	return cardLevelTwoLimit;
-}
-
 function isRailwayCard(card) {
 	var railwayCardLength = 16;
 	return card.value.length === railwayCardLength;
@@ -227,26 +212,6 @@ function discountActive(discountCode) {
 	return bonusDiscountActive;
 }
 
-function bonusDiscountCode() {
-	var bonusDiscountCode = 27;
-	return bonusDiscountCode;
-}
-
-function railwayDiscountCode() {
-	var railwayDiscountCode = 29;
-	return railwayDiscountCode;
-}
-
-function manualDiscountCode() {
-	var manualDiscountCode = 28;
-	return manualDiscountCode;
-}
-
-function automaticDiscountCode() {
-	var automaticDiscountCode = 100000000;
-	return automaticDiscountCode;
-}
-
 function sertificateInformation(card) {
 	var sertificateInformation = {
 		"summRemain": 0,
@@ -272,16 +237,6 @@ function addSummToCard(card, counterTypeCode, summ) {
 			break;
 		}
 	}
-}
-
-function floatNominalSertificatePaymentCode() {
-	var sertificatePaymentCode = 101;
-	return sertificatePaymentCode;
-}
-
-function fixedNominalSertificatePaymentCode() {
-	var sertificatePaymentCode = 5;
-	return sertificatePaymentCode;
 }
 
 function getSertificateString() {
@@ -654,3 +609,51 @@ function maxBonusPercent(summDokForSkid) {
 	return standartProc;
 }
 
+// region magicNumbers
+
+function cardLevelCounterTypeCode() {
+	var cardLevelCounterTypeCode = 3;
+	return cardLevelCounterTypeCode;
+}
+
+function sertificateCounterTypeCode() {
+	var sertificateCounterTypeCode = 2;
+	return sertificateCounterTypeCode;
+}
+
+function cardLevelTwoLimit() {
+	var cardLevelTwoLimit = 100000;
+	return cardLevelTwoLimit;
+}
+
+function bonusDiscountCode() {
+	var bonusDiscountCode = 27;
+	return bonusDiscountCode;
+}
+
+function railwayDiscountCode() {
+	var railwayDiscountCode = 29;
+	return railwayDiscountCode;
+}
+
+function manualDiscountCode() {
+	var manualDiscountCode = 28;
+	return manualDiscountCode;
+}
+
+function automaticDiscountCode() {
+	var automaticDiscountCode = 100000000;
+	return automaticDiscountCode;
+}
+
+function floatNominalSertificatePaymentCode() {
+	var sertificatePaymentCode = 101;
+	return sertificatePaymentCode;
+}
+
+function fixedNominalSertificatePaymentCode() {
+	var sertificatePaymentCode = 5;
+	return sertificatePaymentCode;
+}
+
+// endregion
