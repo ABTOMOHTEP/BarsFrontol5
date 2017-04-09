@@ -1,3 +1,4 @@
+// region EventHandlers
 function init() {
 	frontol.addEventListener("addCard", "beforeAddCard", true);
 	frontol.addEventListener("addCard", "afterAddCard", false);
@@ -8,8 +9,6 @@ function init() {
 	frontol.addEventListener("closeDocument", "beforeCloseDocument", true);
 	frontol.addEventListener("closeDocument", "afterCloseDocument", false);
 }
-
-// region EventHandlers
 
 function beforeAddCard(card) {
 	var dCard = frontol.currentDocument.card;
