@@ -1,4 +1,5 @@
 // region EventHandlers
+
 function init() {
 	frontol.addEventListener("addCard", "beforeAddCard", true);
 	frontol.addEventListener("addCard", "afterAddCard", false);
@@ -169,11 +170,6 @@ function afterCloseDocument() {
 
 // endregion
 
-function showMessageAndCancel(text) {
-	frontol.actions.showMessage(text);
-	frontol.actions.cancel();
-}
-
 function isRailwayCard(card) {
 	var railwayCardLength = 16;
 	return card.value.length === railwayCardLength;
@@ -189,26 +185,22 @@ function isSertificate(card) {
 	return card.value.length === sertificateCardLength;
 }
 
+function removeFromStopList(card) {
+	var cClassifier = card.classifier;
+	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
+		cClassifier.unBind();
+	}
+}
+
+function addToStopList(card) {
+	card.classifier.bind(1);
+}
+
 function checkDiscountsForPositionsLock() {
 	if (discountActive(bonusDiscountCode()) || discountActive(railwayDiscountCode())) {
 		showMessageAndCancel("Запрещено добавлять/изменять позиции \n"
 			+ "в чеке со списанием бонусами или картами РЖД!");
 	}
-}
-
-function discountActive(discountCode) {
-	var bonusDiscountActive = false;
-	var dPosition = frontol.currentDocument.position;
-	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
-		var pDiscountPos = frontol.currentDocument.position.discountPos;
-		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-			if (pDiscountPos.marketingAction.code === discountCode
-				&& pDiscountPos.sum > 0) {
-				bonusDiscountActive = true;
-			}
-		}
-	}
-	return bonusDiscountActive;
 }
 
 function sertificateInformation(card) {
@@ -228,16 +220,6 @@ function sertificateInformation(card) {
 	return sertificateInformation;
 }
 
-function addSummToCard(card, counterTypeCode, summ) {
-	var cCounter = card.counter;
-	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-		if (cCounter.type.code === counterTypeCode) {
-			cCounter.addValue(summ);
-			break;
-		}
-	}
-}
-
 function getSertificateString() {
 	return "500\n"
 		+ "1000\n"
@@ -245,17 +227,6 @@ function getSertificateString() {
 		+ "2000\n"
 		+ "3000\n"
 		+ "5000";
-}
-
-function removeFromStopList(card) {
-	var cClassifier = card.classifier;
-	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
-		cClassifier.unBind();
-	}
-}
-
-function addToStopList(card) {
-	card.classifier.bind(1);
 }
 
 function cardIsInStopList(card) {
@@ -446,14 +417,6 @@ function calculateBonusMacro() {
 	frontol.currentDocument.recalculateAllDiscounts();
 }
 
-function documentDiscountsAreActive() {
-	var discActive = false;
-	if (frontol.currentDocument.discountDoc.count > 0) {
-		discActive = true;
-	}
-	return discActive;
-}
-
 function calculateRailwayDiscount() {
 	if (discountActive(bonusDiscountCode())) {
 		showMessageAndCancel("Запрещено применять скидку по карте РЖД \n"
@@ -495,15 +458,6 @@ function bonusSkidWare(bonusPosition) {
 		}
 	}
 	return finalSkid;
-}
-
-function getAspectString(position) {
-	var aspectString = "";
-	var pAspect = position.aspect;
-	for (pAspect.index = 1; pAspect.index <= pAspect.count;	pAspect.index ++) {
-		aspectString += pAspect.aspectText;
-	}
-	return aspectString;
 }
 
 function getStandartProc(SummCheque) {
@@ -607,6 +561,57 @@ function maxBonusPercent(summDokForSkid) {
 	}
 	return standartProc;
 }
+
+// region frontolFunctions
+
+function showMessageAndCancel(text) {
+	frontol.actions.showMessage(text);
+	frontol.actions.cancel();
+}
+
+function addSummToCard(card, counterTypeCode, summ) {
+	var cCounter = card.counter;
+	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+		if (cCounter.type.code === counterTypeCode) {
+			cCounter.addValue(summ);
+			break;
+		}
+	}
+}
+
+function discountActive(discountCode) {
+	var bonusDiscountActive = false;
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		var pDiscountPos = frontol.currentDocument.position.discountPos;
+		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+			if (pDiscountPos.marketingAction.code === discountCode
+				&& pDiscountPos.sum > 0) {
+				bonusDiscountActive = true;
+			}
+		}
+	}
+	return bonusDiscountActive;
+}
+
+function documentDiscountsAreActive() {
+	var discActive = false;
+	if (frontol.currentDocument.discountDoc.count > 0) {
+		discActive = true;
+	}
+	return discActive;
+}
+
+function getAspectString(position) {
+	var aspectString = "";
+	var pAspect = position.aspect;
+	for (pAspect.index = 1; pAspect.index <= pAspect.count;	pAspect.index ++) {
+		aspectString += pAspect.aspectText;
+	}
+	return aspectString;
+}
+
+// endregion
 
 // region magicNumbers
 
