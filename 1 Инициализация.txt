@@ -146,7 +146,7 @@ function afterCloseDocument() {
 	var Mess = "";
 	var dCard = frontol.currentDocument.card;
 	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-		if (dCard.value.length === 6) {
+		if (isBonusCard(dCard)) {
 			bonusCardIndex = dCard.index;
 			// начисление
 			if (BonusSumm > 0) {
@@ -157,8 +157,7 @@ function afterCloseDocument() {
 			if (totalDisc > 0) {
 				dCard.counter.addValueByTypeCode(1, Math.ceil(-totalDisc));
 				Mess = Mess + "\nСписано бонусных баллов: " + Math.ceil(totalDisc);
-				// привязываем к карте классификатор стоп-листа списаний
-				dCard.classifier.bind(1);
+				addToStopList(dCard);
 			}
 			break;
 		}
