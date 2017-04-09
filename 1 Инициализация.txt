@@ -38,8 +38,8 @@ function afterAddCard(card) {
 		frontol.actions.showMessage("На карте накоплено баллов: " + cardInformation.summBonusClient
 			+ "\n Сумма покупок по карте: " + cardInformation.buySumm
 			+ "\n Уровень карты: " + cardInformation.bonusCardLevel);
-	} else if (isRailwayCard(card)) {
-		calculateRailwayDiscount();
+	// } else if (isRailwayCard(card)) {
+	// 	calculateRailwayDiscountMacro();
 	}
 }
 
@@ -166,102 +166,6 @@ function afterCloseDocument() {
 	if (bonusCardIndex !== 0) {
 		frontol.actions.showMessage(Mess);
 	}
-}
-
-// endregion
-
-function isRailwayCard(card) {
-	var railwayCardLength = 16;
-	return card.value.length === railwayCardLength;
-}
-
-function isBonusCard(card) {
-	var bonusCardLength = 6;
-	return card.value.length === bonusCardLength;
-}
-
-function isSertificate(card) {
-	var sertificateCardLength = 8;
-	return card.value.length === sertificateCardLength;
-}
-
-function removeFromStopList(card) {
-	var cClassifier = card.classifier;
-	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
-		cClassifier.unBind();
-	}
-}
-
-function addToStopList(card) {
-	card.classifier.bind(1);
-}
-
-function checkDiscountsForPositionsLock() {
-	if (discountActive(bonusDiscountCode()) || discountActive(railwayDiscountCode())) {
-		showMessageAndCancel("Запрещено добавлять/изменять позиции \n"
-			+ "в чеке со списанием бонусами или картами РЖД!");
-	}
-}
-
-function sertificateInformation(card) {
-	var sertificateInformation = {
-		"summRemain": 0,
-		"isInStopList": false
-	};
-	var cCounter = card.counter;
-	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-		if (cCounter.type.code === sertificateCounterTypeCode()) {
-			sertificateInformation.summRemain = cCounter.value;
-		}
-	}
-	if (cardIsInStopList(card)) {
-		sertificateInformation.isInStopList = true;
-	}
-	return sertificateInformation;
-}
-
-function getSertificateString() {
-	return "500\n"
-		+ "1000\n"
-		+ "1500\n"
-		+ "2000\n"
-		+ "3000\n"
-		+ "5000";
-}
-
-function cardIsInStopList(card) {
-	var isInStopList = false;
-	var cClassifier = card.classifier;
-	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
-		if (cClassifier.code === 1) {
-			isInStopList = true;
-		}
-	}
-	return isInStopList;
-}
-
-function bonusCardInformation(card) {
-	var cardInformation = {
-		"summBonusClient": 0,
-		"bonusCardLevel": 1,
-		"buySumm": 0,
-		"isInStopList": false
-	};
-	var cCounter = card.counter;
-	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-		if (cCounter.type.code === 1) {
-			cardInformation.summBonusClient = cCounter.value;
-		} else if (cCounter.type.code === cardLevelCounterTypeCode()) {
-			cardInformation.buySumm = Math.floor(cCounter.value);
-			if (cardInformation.buySumm >= cardLevelTwoLimit()) {
-				cardInformation.bonusCardLevel = 2;
-			}
-		}
-	}
-	if (cardIsInStopList(card)) {
-		cardInformation.isInStopList = true;
-	}
-	return cardInformation;
 }
 
 function calculateBonusMacro() {
@@ -417,7 +321,7 @@ function calculateBonusMacro() {
 	frontol.currentDocument.recalculateAllDiscounts();
 }
 
-function calculateRailwayDiscount() {
+function calculateRailwayDiscountMacro() {
 	if (discountActive(bonusDiscountCode())) {
 		showMessageAndCancel("Запрещено применять скидку по карте РЖД \n"
 		+ "при наличии списания бонусов!");
@@ -426,6 +330,102 @@ function calculateRailwayDiscount() {
 	// todo
 
 	frontol.currentDocument.recalculateAllDiscounts();
+}
+
+// endregion
+
+function isRailwayCard(card) {
+	var railwayCardLength = 16;
+	return card.value.length === railwayCardLength;
+}
+
+function isBonusCard(card) {
+	var bonusCardLength = 6;
+	return card.value.length === bonusCardLength;
+}
+
+function isSertificate(card) {
+	var sertificateCardLength = 8;
+	return card.value.length === sertificateCardLength;
+}
+
+function removeFromStopList(card) {
+	var cClassifier = card.classifier;
+	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
+		cClassifier.unBind();
+	}
+}
+
+function addToStopList(card) {
+	card.classifier.bind(1);
+}
+
+function checkDiscountsForPositionsLock() {
+	if (discountActive(bonusDiscountCode()) || discountActive(railwayDiscountCode())) {
+		showMessageAndCancel("Запрещено добавлять/изменять позиции \n"
+			+ "в чеке со списанием бонусами или картами РЖД!");
+	}
+}
+
+function sertificateInformation(card) {
+	var sertificateInformation = {
+		"summRemain": 0,
+		"isInStopList": false
+	};
+	var cCounter = card.counter;
+	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+		if (cCounter.type.code === sertificateCounterTypeCode()) {
+			sertificateInformation.summRemain = cCounter.value;
+		}
+	}
+	if (cardIsInStopList(card)) {
+		sertificateInformation.isInStopList = true;
+	}
+	return sertificateInformation;
+}
+
+function getSertificateString() {
+	return "500\n"
+		+ "1000\n"
+		+ "1500\n"
+		+ "2000\n"
+		+ "3000\n"
+		+ "5000";
+}
+
+function cardIsInStopList(card) {
+	var isInStopList = false;
+	var cClassifier = card.classifier;
+	for (cClassifier.index = 1; cClassifier.index <= cClassifier.count; cClassifier.index ++) {
+		if (cClassifier.code === 1) {
+			isInStopList = true;
+		}
+	}
+	return isInStopList;
+}
+
+function bonusCardInformation(card) {
+	var cardInformation = {
+		"summBonusClient": 0,
+		"bonusCardLevel": 1,
+		"buySumm": 0,
+		"isInStopList": false
+	};
+	var cCounter = card.counter;
+	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+		if (cCounter.type.code === 1) {
+			cardInformation.summBonusClient = cCounter.value;
+		} else if (cCounter.type.code === cardLevelCounterTypeCode()) {
+			cardInformation.buySumm = Math.floor(cCounter.value);
+			if (cardInformation.buySumm >= cardLevelTwoLimit()) {
+				cardInformation.bonusCardLevel = 2;
+			}
+		}
+	}
+	if (cardIsInStopList(card)) {
+		cardInformation.isInStopList = true;
+	}
+	return cardInformation;
 }
 
 function raylwayDiscountWare(docPosition) {
