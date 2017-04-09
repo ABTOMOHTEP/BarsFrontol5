@@ -334,19 +334,18 @@ function calculateRailwayDiscountMacro() {
 
 // endregion
 
+// region businessLogic
+
 function isRailwayCard(card) {
-	var railwayCardLength = 16;
-	return card.value.length === railwayCardLength;
+	return card.value.length === railwayCardLength();
 }
 
 function isBonusCard(card) {
-	var bonusCardLength = 6;
-	return card.value.length === bonusCardLength;
+	return card.value.length === bonusCardLength();
 }
 
 function isSertificate(card) {
-	var sertificateCardLength = 8;
-	return card.value.length === sertificateCardLength;
+	return card.value.length === sertificateCardLength();
 }
 
 function removeFromStopList(card) {
@@ -477,8 +476,9 @@ function getStandartProc(SummCheque) {
 	return standartProc;
 }
 
-function getSummRestrictWares(position) {
+function getSummRestrictWares() {
 	// расчет суммы товаров, запрещенных для начисления бонусов
+	var position = frontol.currentDocument.position;
 	var summRestrictWares = 0;
 	for (position.index = 1; position.index <= position.count; position.index ++) {
 		if (position.storno === 1) {
@@ -495,7 +495,7 @@ function getSummRestrictWares(position) {
 }
 
 function addBonus() {
-	var summRestrictWares = getSummRestrictWares(frontol.currentDocument.position);
+	var summRestrictWares = getSummRestrictWares();
 	var standartProc = getStandartProc(frontol.currentDocument.totalSum - summRestrictWares);
 	var bonusTotal = 0;
 	var dPosition = frontol.currentDocument.position;
@@ -561,6 +561,8 @@ function maxBonusPercent(summDokForSkid) {
 	}
 	return standartProc;
 }
+
+// endregion
 
 // region frontolFunctions
 
@@ -658,6 +660,21 @@ function floatNominalSertificatePaymentCode() {
 function fixedNominalSertificatePaymentCode() {
 	var sertificatePaymentCode = 5;
 	return sertificatePaymentCode;
+}
+
+function railwayCardLength() {
+	var railwayCardLength = 16;
+	return railwayCardLength;
+}
+
+function bonusCardLength() {
+	var bonusCardLength = 6;
+	return bonusCardLength;
+}
+
+function sertificateCardLength() {
+	var sertificateCardLength = 8;
+	return sertificateCardLength;
 }
 
 // endregion
