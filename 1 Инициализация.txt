@@ -9,10 +9,7 @@ function init() {
 	frontol.addEventListener("closeDocument", "afterCloseDocument", false);
 }
 
-function showMessageAndCancel(text) {
-	frontol.actions.showMessage(text);
-	frontol.actions.cancel();
-}
+// region EventHandlers
 
 function beforeAddCard(card) {
 	var dCard = frontol.currentDocument.card;
@@ -46,6 +43,138 @@ function afterAddCard(card) {
 	}
 }
 
+function beforeChangePosition(position) {
+	checkDiscountsForPositionsLock();
+}
+
+function beforeAddPosition(position) {
+	if (frontol.currentDocument.type.name === "ВОЗВРАТ") {
+		return;
+	}
+	checkDiscountsForPositionsLock();
+}
+
+function beforeAddPayment(payment) {
+	// напоминание кассиру
+	if (frontol.currentDocument.type.name === "ПРОДАЖА"
+		&& frontol.currentDocument.payment.count === 0
+		&& frontol.currentDocument.card.count === 0) {
+		if (frontol.actions.showMessage("Ввести бонусную/подарочную карту в чек?", Button.YesNo + Icon.Question) === DialogResult.Yes) {
+			var WShell = new ActiveXObject("WScript.Shell");
+			WShell.SendKeys ("^({F8})");
+			frontol.actions.cancel();
+		}
+	}
+
+	// оплата подарочными сертификатами
+	if (payment.type.name === "Подарочная карта") {
+		var sertInformation = "";
+		var totalSertificatesRemain = 0;
+		var dCard = frontol.currentDocument.card;
+		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+			if (isSertificate(dCard)) {
+				sertInformation = sertificateInformation(dCard);
+				totalSertificatesRemain += sertInformation.summRemain;
+			}
+		}
+		if (totalSertificatesRemain === 0) {
+			showMessageAndCancel("Сертификаты не введены или полностью погашены!");
+		}
+
+		// Списываем со всех сертификатов
+		var skid1 = Math.min(frontol.currentDocument.totalSum, totalSertificatesRemain);
+		var realDisc = skid1;
+		var remainingSumm = realDisc;
+		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+			if (isSertificate(dCard)) {
+				sertInformation = sertificateInformation(dCard);
+				var sertificatePaymentSumm = Math.min(sertInformation.summRemain, remainingSumm);
+				remainingSumm -= sertificatePaymentSumm;
+				addSummToCard(dCard, sertificateCounterTypeCode(), -sertificatePaymentSumm);
+				addToStopList(dCard);
+			}
+		}
+		frontol.currentDocument.addPayment(floatNominalSertificatePaymentCode(), realDisc);
+		frontol.actions.cancel();
+	// оплата сертификатами с фиксированным номиналом
+	} else if (payment.type.name === "Сертификат") {
+		var sertificateString = getSertificateString();
+		var sertNominal = frontol.actions.selectString("Выберите номинал сертификата", sertificateString, sertificateString);
+		if (sertNominal !== null) {
+			frontol.currentDocument.addPayment(fixedNominalSertificatePaymentCode(), sertNominal);
+		}
+		frontol.actions.cancel();
+	}
+}
+
+function beforeStornoPayment(payment) {
+	// при сторнировании оплаты возвращаем сумму платежа подарочными сертификатами на счетчики
+	if (payment.type.name !== "Подарочная карта") {
+		return;
+	}
+	var remainingSummForStorno = payment.sumInPaymentCurrency;
+	var dCard = frontol.currentDocument.card;
+	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+		if (isSertificate(dCard)) {
+			var cCounter = dCard.counter;
+			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
+				if (cCounter.type.code === sertificateCounterTypeCode()) {
+					cCounter.addValue(remainingSummForStorno);
+					remainingSummForStorno = 0;
+					removeFromStopList(dCard);
+					break;
+				}
+			}
+		}
+	}
+}
+
+function beforeCloseDocument() {
+	if (frontol.currentDocument.type.name === "ВОЗВРАТ") {
+		return;
+	}
+	addBonus();
+}
+
+function afterCloseDocument() {
+	if (frontol.currentDocument.type.name === "ВОЗВРАТ" || frontol.currentDocument.card.count === 0) {
+		return;
+	}
+	var bonusCardIndex = 0;
+	var BonusSumm = frontol.currentDocument.userValues.get("nachislenie");
+	var totalDisc = frontol.currentDocument.userValues.get("spisanie");
+	var Mess = "";
+	var dCard = frontol.currentDocument.card;
+	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+		if (dCard.value.length === 6) {
+			bonusCardIndex = dCard.index;
+			// начисление
+			if (BonusSumm > 0) {
+				dCard.counter.addValueByTypeCode(1, Math.ceil(BonusSumm));
+				Mess = Mess + "На чек начислено бонусных баллов: " + BonusSumm;
+			}
+			// списание
+			if (totalDisc > 0) {
+				dCard.counter.addValueByTypeCode(1, Math.ceil(-totalDisc));
+				Mess = Mess + "\nСписано бонусных баллов: " + Math.ceil(totalDisc);
+				// привязываем к карте классификатор стоп-листа списаний
+				dCard.classifier.bind(1);
+			}
+			break;
+		}
+	}
+	if (bonusCardIndex !== 0) {
+		frontol.actions.showMessage(Mess);
+	}
+}
+
+// endregion
+
+function showMessageAndCancel(text) {
+	frontol.actions.showMessage(text);
+	frontol.actions.cancel();
+}
+
 function cardLevelCounterTypeCode() {
 	var cardLevelCounterTypeCode = 3;
 	return cardLevelCounterTypeCode;
@@ -74,17 +203,6 @@ function isBonusCard(card) {
 function isSertificate(card) {
 	var sertificateCardLength = 8;
 	return card.value.length === sertificateCardLength;
-}
-
-function beforeChangePosition(position) {
-	checkDiscountsForPositionsLock();
-}
-
-function beforeAddPosition(position) {
-	if (frontol.currentDocument.type.name === "ВОЗВРАТ") {
-		return;
-	}
-	checkDiscountsForPositionsLock();
 }
 
 function checkDiscountsForPositionsLock() {
@@ -146,59 +264,6 @@ function sertificateInformation(card) {
 	return sertificateInformation;
 }
 
-function beforeAddPayment(payment) {
-	// напоминание кассиру
-	if (frontol.currentDocument.type.name === "ПРОДАЖА"
-		&& frontol.currentDocument.payment.count === 0
-		&& frontol.currentDocument.card.count === 0) {
-		if (frontol.actions.showMessage("Ввести бонусную/подарочную карту в чек?", Button.YesNo + Icon.Question) === DialogResult.Yes) {
-			var WShell = new ActiveXObject("WScript.Shell");
-			WShell.SendKeys ("^({F8})");
-			frontol.actions.cancel();
-		}
-	}
-
-	// оплата подарочными сертификатами
-	if (payment.type.name === "Подарочная карта") {
-		var sertInformation = "";
-		var totalSertificatesRemain = 0;
-		var dCard = frontol.currentDocument.card;
-		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-			if (isSertificate(dCard)) {
-				sertInformation = sertificateInformation(dCard);
-				totalSertificatesRemain += sertInformation.summRemain;
-			}
-		}
-		if (totalSertificatesRemain === 0) {
-			showMessageAndCancel("Сертификаты не введены или полностью погашены!");
-		}
-
-		// Списываем со всех сертификатов
-		var skid1 = Math.min(frontol.currentDocument.totalSum, totalSertificatesRemain);
-		var realDisc = skid1;
-		var remainingSumm = realDisc;
-		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-			if (isSertificate(dCard)) {
-				sertInformation = sertificateInformation(dCard);
-				var sertificatePaymentSumm = Math.min(sertInformation.summRemain, remainingSumm);
-				remainingSumm -= sertificatePaymentSumm;
-				addSummToCard(dCard, sertificateCounterTypeCode(), -sertificatePaymentSumm);
-				addToStopList(dCard);
-			}
-		}
-		frontol.currentDocument.addPayment(floatNominalSertificatePaymentCode(), realDisc);
-		frontol.actions.cancel();
-	// оплата сертификатами с фиксированным номиналом
-	} else if (payment.type.name === "Сертификат") {
-		var sertificateString = getSertificateString();
-		var sertNominal = frontol.actions.selectString("Выберите номинал сертификата", sertificateString, sertificateString);
-		if (sertNominal !== null) {
-			frontol.currentDocument.addPayment(fixedNominalSertificatePaymentCode(), sertNominal);
-		}
-		frontol.actions.cancel();
-	}
-}
-
 function addSummToCard(card, counterTypeCode, summ) {
 	var cCounter = card.counter;
 	for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
@@ -237,28 +302,6 @@ function removeFromStopList(card) {
 
 function addToStopList(card) {
 	card.classifier.bind(1);
-}
-
-function beforeStornoPayment(payment) {
-	// при сторнировании оплаты возвращаем сумму платежа подарочными сертификатами на счетчики
-	if (payment.type.name !== "Подарочная карта") {
-		return;
-	}
-	var remainingSummForStorno = payment.sumInPaymentCurrency;
-	var dCard = frontol.currentDocument.card;
-	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-		if (isSertificate(dCard)) {
-			var cCounter = dCard.counter;
-			for (cCounter.index = 1; cCounter.index <= cCounter.count; cCounter.index ++) {
-				if (cCounter.type.code === sertificateCounterTypeCode()) {
-					cCounter.addValue(remainingSummForStorno);
-					remainingSummForStorno = 0;
-					removeFromStopList(dCard);
-					break;
-				}
-			}
-		}
-	}
 }
 
 function cardIsInStopList(card) {
@@ -507,45 +550,6 @@ function getAspectString(position) {
 		aspectString += pAspect.aspectText;
 	}
 	return aspectString;
-}
-
-function beforeCloseDocument() {
-	if (frontol.currentDocument.type.name === "ВОЗВРАТ") {
-		return;
-	}
-	addBonus();
-}
-
-function afterCloseDocument() {
-	if (frontol.currentDocument.type.name === "ВОЗВРАТ" || frontol.currentDocument.card.count === 0) {
-		return;
-	}
-	var bonusCardIndex = 0;
-	var BonusSumm = frontol.currentDocument.userValues.get("nachislenie");
-	var totalDisc = frontol.currentDocument.userValues.get("spisanie");
-	var Mess = "";
-	var dCard = frontol.currentDocument.card;
-	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
-		if (dCard.value.length === 6) {
-			bonusCardIndex = dCard.index;
-			// начисление
-			if (BonusSumm > 0) {
-				dCard.counter.addValueByTypeCode(1, Math.ceil(BonusSumm));
-				Mess = Mess + "На чек начислено бонусных баллов: " + BonusSumm;
-			}
-			// списание
-			if (totalDisc > 0) {
-				dCard.counter.addValueByTypeCode(1, Math.ceil(-totalDisc));
-				Mess = Mess + "\nСписано бонусных баллов: " + Math.ceil(totalDisc);
-				// привязываем к карте классификатор стоп-листа списаний
-				dCard.classifier.bind(1);
-			}
-			break;
-		}
-	}
-	if (bonusCardIndex !== 0) {
-		frontol.actions.showMessage(Mess);
-	}
 }
 
 function getStandartProc(SummCheque) {
