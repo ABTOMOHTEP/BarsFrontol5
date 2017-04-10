@@ -371,9 +371,9 @@ function calculateRailwayDiscountMacro() {
 		var wClassifier = dPosition.ware.classifier;
 		var maxRailwayDiscount = 100;
 		for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
-			if (wClassifier.code === 3) {
+			if (wClassifier.code === 6) {
 				maxRailwayDiscount = 10;
-			} else if (wClassifier.code === 4) {
+			} else if (wClassifier.code === 7) {
 				maxRailwayDiscount = 15;
 			}
 		}
