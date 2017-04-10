@@ -196,7 +196,6 @@ function calculateBonusMacro() {
 	var summDiscWares = 0;   // сумма, разрешенная для списания
 	var summRealDisc = 0;    // сумма примененных скидок на чек
 	var summDokForSkid = 0;  // сумма документа для расчета процента скидки
-	var autoDiscActive = false;
 	var summWares10 = 0;
 	var summWares20 = 0;
 	var dPosition = frontol.currentDocument.position;
@@ -204,7 +203,7 @@ function calculateBonusMacro() {
 	var wClassifier = dPosition.ware.classifier;
 	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
 		// расчет максимальной суммы списания для товаров с максимальной скидкой
-		autoDiscActive = false;
+		var autoDiscActive = false;
 		if (dPosition.storno === 1) {
 			continue;
 		}
@@ -326,7 +325,66 @@ function calculateRailwayDiscountMacro() {
 		+ "при наличии списания бонусов!");
 	}
 
-	// todo
+	var railwayCardFound = false;
+	var dCard = frontol.currentDocument.card;
+	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
+		if (isRailwayCard(dCard)) {
+			railwayCardFound = true;
+			break;
+		}
+	}
+	if (!railwayCardFound) {
+		showMessageAndCancel("Карта РЖД не введена!");
+	}
+	if (documentDiscountsAreActive()) {
+		showMessageAndCancel("Запрещено делать скидки РЖД при наличии другой скидки на документ!");
+	}
+	if (discountActive(manualDiscountCode())) {
+		showMessageAndCancel("Запрещено делать скидки РЖД при наличии ручной скидки!");
+	}
+
+	var dPosition = frontol.currentDocument.position;
+	for (dPosition.index = 1; dPosition.index <= dPosition.count; dPosition.index ++) {
+		var maxWareDiscount = 100;
+		var autoDiscActive = false;
+		var pDiscountPos = dPosition.discountPos;
+		if (dPosition.storno === 1) {
+			continue;
+		}
+		if (dPosition.ware.code === 0) {		// продажи по свободной цене
+			continue;
+		} else if (dPosition.ware.maxDiscount !== 0) {		// обычные продажи
+			maxWareDiscount = dPosition.ware.maxDiscount;
+		}
+		if (dPosition.sum - dPosition.totalSum !== 0) {
+			for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+				if (pDiscountPos.marketingAction.code === automaticDiscountCode() // ищем автоматические ненулевые скидки на позицию
+					&& pDiscountPos.sum > 0) {
+					autoDiscActive = true;
+				}
+			}
+		}
+		if (autoDiscActive) {
+			continue;
+		}
+
+		var wClassifier = dPosition.ware.classifier;
+		var maxRailwayDiscount = 100;
+		for (wClassifier.index = 1; wClassifier.index <= wClassifier.count; wClassifier.index ++) {
+			if (wClassifier.code === 3) {
+				maxRailwayDiscount = 10;
+			} else if (wClassifier.code === 4) {
+				maxRailwayDiscount = 15;
+			}
+		}
+		if (maxRailwayDiscount === 100) {
+			maxRailwayDiscount = maxBonusPercent(frontol.currentDocument.totalSum);
+		}
+
+		var finalDiscount = Math.min(maxWareDiscount, maxRailwayDiscount);
+		var varName = "railwayDiscount" + dPosition.index;
+		frontol.currentDocument.userValues.set(varName, finalDiscount);
+	}
 
 	frontol.currentDocument.recalculateAllDiscounts();
 }
