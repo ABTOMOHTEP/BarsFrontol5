@@ -26,7 +26,7 @@ function beforeAddCard(card) {
 	} else if (isRailwayCard(card)) {
 		for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 			if (isRailwayCard(dCard)) {
-				showMessageAndCancel("Карта РЖД уже введена!");
+				showMessageAndCancel("Карта РОСПРОФЖЕЛ уже введена!");
 			}
 		}
 	}
@@ -170,20 +170,20 @@ function afterCloseDocument() {
 function calculateBonusMacro() {
 	if (discountActive(railwayDiscountCode())) {
 		showMessageAndCancel("Запрещено списывать бонусы при наличии \n"
-			+ "скидки по карте РЖД!");
+			+ "скидки по карте РОСПРОФЖЕЛ!");
 	}
-	var bonusCardInformation = "";
+	var bCardInformation = "";
 	var dCard = frontol.currentDocument.card;
 	for (dCard.index = 1; dCard.index <= dCard.count; dCard.index ++) {
 		if (isBonusCard(dCard)) {
-			bonusCardInformation = bonusCardInformation(dCard);
+			bCardInformation = bonusCardInformation(dCard);
 			break;
 		}
 	}
-	if (bonusCardInformation === "") {
+	if (bCardInformation === "") {
 		showMessageAndCancel("Бонусная карта не введена!");
 	}
-	if (bonusCardInformation.isInStopList) {
+	if (bCardInformation.isInStopList) {
 		showMessageAndCancel("С данной карты сегодня уже списывались бонусы!");
 	}
 	if (documentDiscountsAreActive()) {
@@ -234,7 +234,7 @@ function calculateBonusMacro() {
 				}
 			} else if (wClassifier.code === 4) {
 				if (dPosition.sum - dPosition.totalSum === 0) {
-					if (bonusCardInformation.bonusCardLevel === 2) {
+					if (bCardInformation.bonusCardLevel === 2) {
 						summWares20 += dPosition.sum;
 					} else {
 						summWares10 += dPosition.sum;
@@ -258,11 +258,11 @@ function calculateBonusMacro() {
 
 	// расчет суммы скидки от суммы чека (с учетом накоплений клиента)
 	var maxBonusDiscForClient = 0;
-	if (bonusCardInformation.summBonusClient > 0) {
+	if (bCardInformation.summBonusClient > 0) {
 		if (summDokForSkid < 10) {
 			maxBonusDiscForClient = 0;
 		} else {
-			maxBonusDiscForClient = Math.min(Math.floor(bonusCardInformation.summBonusClient), maxBonusDiscForDocument);
+			maxBonusDiscForClient = Math.min(Math.floor(bCardInformation.summBonusClient), maxBonusDiscForDocument);
 		}
 	} else {
 		maxBonusDiscForClient = 0;
@@ -299,7 +299,7 @@ function calculateBonusMacro() {
 					if (wClassifier.code === 3) {  // ищем классификатор с кодом "3" (10 процентов бонусами)
 						koeffWare = 10;
 					} else if (wClassifier.code === 4) {  // ищем классификатор с кодом "4" (20 процентов бонусами)
-						if (bonusCardInformation.bonusCardLevel === 2) {
+						if (bCardInformation.bonusCardLevel === 2) {
 							koeffWare = 20;
 						} else {
 							koeffWare = 10;
@@ -321,7 +321,7 @@ function calculateBonusMacro() {
 
 function calculateRailwayDiscountMacro() {
 	if (discountActive(bonusDiscountCode())) {
-		showMessageAndCancel("Запрещено применять скидку по карте РЖД \n"
+		showMessageAndCancel("Запрещено применять скидку по карте РОСПРОФЖЕЛ \n"
 		+ "при наличии списания бонусов!");
 	}
 
@@ -334,13 +334,13 @@ function calculateRailwayDiscountMacro() {
 		}
 	}
 	if (!railwayCardFound) {
-		showMessageAndCancel("Карта РЖД не введена!");
+		showMessageAndCancel("Карта РОСПРОФЖЕЛ не введена!");
 	}
 	if (documentDiscountsAreActive()) {
-		showMessageAndCancel("Запрещено делать скидки РЖД при наличии другой скидки на документ!");
+		showMessageAndCancel("Запрещено делать скидки по карте РОСПРОФЖЕЛ при наличии другой скидки на документ!");
 	}
 	if (discountActive(manualDiscountCode())) {
-		showMessageAndCancel("Запрещено делать скидки РЖД при наличии ручной скидки!");
+		showMessageAndCancel("Запрещено делать скидки по карте РОСПРОФЖЕЛ при наличии ручной скидки!");
 	}
 
 	var dPosition = frontol.currentDocument.position;
@@ -419,7 +419,7 @@ function addToStopList(card) {
 function checkDiscountsForPositionsLock() {
 	if (discountActive(bonusDiscountCode()) || discountActive(railwayDiscountCode())) {
 		showMessageAndCancel("Запрещено добавлять/изменять позиции \n"
-			+ "в чеке со списанием бонусами или картами РЖД!");
+			+ "в чеке со списанием бонусами или картами РОСПРОФЖЕЛ!");
 	}
 }
 

@@ -124,7 +124,7 @@ function printFooter(print) {
 			} else if (frontol.currentDocument.card.value.length === 8) {
 				print.printStringWordWrap("Подарочная карта: " + dCard.value);
 			} else if (frontol.currentDocument.card.value.length === 16) {
-				print.printStringWordWrap("Карта РЖД: " + dCard.value);
+				print.printStringWordWrap("Карта РОСПРОФЖЕЛ: " + dCard.value);
 			}
 		}
 	}
