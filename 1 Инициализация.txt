@@ -565,13 +565,13 @@ function addBonus() {
 			continue;
 		}
 		var noExtraBonus = false;
-		var pDiscountPos = dPosition.discountPos;
-		for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
-			if (pDiscountPos.marketingAction.code === bonusDiscountCode()
-				&& pDiscountPos.sum > 0) {
-				noExtraBonus = true;
-			}
-		}
+		// var pDiscountPos = dPosition.discountPos;
+		// for (pDiscountPos.index = 1; pDiscountPos.index <= pDiscountPos.count; pDiscountPos.index ++) {
+		// 	if (pDiscountPos.marketingAction.code === bonusDiscountCode()
+		// 		&& pDiscountPos.sum > 0) {
+		// 		noExtraBonus = true;
+		// 	}
+		// }
 
 		var noBonus = false;
 		var extraBonus50 = false;
