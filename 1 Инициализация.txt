@@ -169,6 +169,8 @@ function afterCloseDocument() {
 
 // endregion
 
+// region businessLogic
+
 function calculateBonusMacro() {
 	if (discountActive(railwayDiscountCode())) {
 		showMessageAndCancel("«апрещено списывать бонусы при наличии \n"
@@ -394,8 +396,6 @@ function calculateRailwayDiscountMacro() {
 
 	frontol.currentDocument.recalculateAllDiscounts();
 }
-
-// region businessLogic
 
 function isRailwayCard(card) {
 	return card.value.length === railwayCardLength();
